@@ -11,6 +11,7 @@
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
 
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,12 @@ void ATheMazeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATheMazeCharacter::Look);
+		
+		// Interacting
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ATheMazeCharacter::Interact);
+
+		// Using
+		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Triggered, this, &ATheMazeCharacter::Use);
 	}
 	else
 	{
@@ -92,4 +99,33 @@ void ATheMazeCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void ATheMazeCharacter::Interact(const FInputActionValue& Value)
+{
+	if (Controller == nullptr) return;
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Interact");
+
+	FHitResult outHit;
+
+	FCollisionShape boxTrace = FCollisionShape::MakeBox(FVector3f(30.0f, 120.0f, 30.0f));
+
+	GetWorld()->SweepSingleByChannel(outHit, GetActorLocation(), GetActorForwardVector() * traceDistance, FQuat::Identity, ECC_Visibility, boxTrace);
+ 
+	//DrawDebugBox(GetWorld(), GetActorLocation(), FVector(30.0f, 120.0f, 30.0f), FColor::Emerald, true);
+	
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, outHit.ToString());
+}
+
+void ATheMazeCharacter::Use(const FInputActionValue& Value)
+{
+	if (Controller == nullptr) return;
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Use");
+
+	return;
 }

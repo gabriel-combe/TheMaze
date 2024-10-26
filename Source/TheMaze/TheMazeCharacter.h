@@ -21,9 +21,33 @@ class ATheMazeCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+private:
+	
+	/** Current Health */
+	UPROPERTY(BlueprintReadOnly)
+	float currentHealth = 100.0f;
+
+	/** Current Ability Points */
+	UPROPERTY(BlueprintReadOnly)
+	int currentAbilityPoints = 100.0f;
+	
+	/** Number of Key owned */
+	UPROPERTY(BlueprintReadOnly)
+	int keyCount = 100.0f;
+
+public:
+
 	/** Distance of the box trace */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
 	float traceDistance = 100.0f;
+
+	/** Maximum Health */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	float maxHealth = 100.0f;
+
+	/** Maximum Ability Points */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	int maxAbilityPoints = 100.0f;
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))

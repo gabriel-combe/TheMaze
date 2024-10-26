@@ -114,10 +114,6 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	GetWorld()->SweepSingleByChannel(outHit, GetActorLocation(), GetActorForwardVector() * traceDistance, FQuat::Identity, ECC_Visibility, boxTrace);
  
-	//DrawDebugBox(GetWorld(), GetActorLocation(), FVector(30.0f, 120.0f, 30.0f), FColor::Emerald, true);
-	
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, outHit.ToString());
 }
 
 void ATheMazeCharacter::Use(const FInputActionValue& Value)

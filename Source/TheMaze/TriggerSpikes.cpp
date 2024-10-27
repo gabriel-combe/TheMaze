@@ -3,3 +3,8 @@
 
 #include "TriggerSpikes.h"
 
+//ATriggerSpikes::ATriggerSpikes() {
+//	Super(ATriggerBox);
+//
+//	//CollisionComponent->SetupAttachement()
+//}

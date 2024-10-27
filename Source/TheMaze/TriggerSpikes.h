@@ -13,5 +13,11 @@ UCLASS()
 class THEMAZE_API ATriggerSpikes : public ATriggerBox
 {
 	GENERATED_BODY()
+
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+//	UStaticMeshComponent* SpikesMesh;
+//
+//public:
+//	ATriggerSpikes();
 	
 };

@@ -30,6 +30,9 @@ class ATheMazeCharacter : public ACharacter
 	/** Number of Key owned */
 	int keyCount;
 
+	/** Whether the character is dead or not */
+	bool dead;
+
 	/** Distance of the box trace */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true", ClampMin = 0.0f))
 	float traceDistance = 100.0f;
@@ -113,6 +116,14 @@ public:
 	/** Returns the current number of key owned **/
 	UFUNCTION(BlueprintCallable, Category = "TheMaze")
 	int GetKeyCount() const { return keyCount; }
+
+	/** Heal Character and returns whether it was successful or not **/
+	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	bool HealCharacter(const float HealAmount);
+
+	/** Damage Character and returns whether it was successful or not **/
+	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	bool DamageCharacter(const float DamageAmount);
 
 };
 

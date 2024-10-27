@@ -46,6 +46,9 @@ ATheMazeCharacter::ATheMazeCharacter()
 	// Set the number of Key to 0
 	keyCount = 0;
 
+	// Set Dead to false
+	dead = false;
+
 }
 
 void ATheMazeCharacter::BeginPlay()
@@ -114,10 +117,8 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 {
 	if (Controller == nullptr) return;
 
-	if (GEngine) {
+	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Interact");
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), currentHealth));
-	}
 
 	FHitResult outHit;
 
@@ -125,7 +126,14 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	GetWorld()->SweepSingleByChannel(outHit, GetActorLocation(), GetActorForwardVector() * traceDistance, FQuat::Identity, ECC_Visibility, boxTrace);
 
+	// TEST START
 	keyCount++;
+
+	HealCharacter(10.0f);
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), currentHealth));
+	// TEST END
  
 }
 
@@ -136,7 +144,37 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Use");
 
+	// TEST START
 	currentAbilityPoints--;
 
-	return;
+	DamageCharacter(15.0f);
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%d"), dead));
+	// TEST END
+}
+
+bool ATheMazeCharacter::HealCharacter(const float HealAmount)
+{
+	if (currentAbilityPoints >= maxHealth) return false;
+
+	currentHealth += HealAmount;
+
+	currentHealth = FMath::Clamp(currentHealth, 0.0f, maxHealth);
+
+	return true;
+}
+
+bool ATheMazeCharacter::DamageCharacter(const float DamageAmount)
+{
+	currentHealth -= DamageAmount;
+
+	if (currentHealth <= 0.0f) {
+		dead = true;
+		return false;
+	}
+
+	currentHealth = FMath::Clamp(currentHealth, 0.0f, maxHealth);
+
+	return true;
 }

@@ -37,6 +37,15 @@ ATheMazeCharacter::ATheMazeCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	// Set Health to max Health
+	currentHealth = maxHealth;
+
+	// Set Ability Points to max Ability Points
+	currentAbilityPoints = maxAbilityPoints;
+
+	// Set the number of Key to 0
+	keyCount = 0;
+
 }
 
 void ATheMazeCharacter::BeginPlay()
@@ -105,14 +114,18 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 {
 	if (Controller == nullptr) return;
 
-	if (GEngine)
+	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Interact");
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), currentHealth));
+	}
 
 	FHitResult outHit;
 
 	FCollisionShape boxTrace = FCollisionShape::MakeBox(FVector3f(30.0f, 120.0f, 30.0f));
 
 	GetWorld()->SweepSingleByChannel(outHit, GetActorLocation(), GetActorForwardVector() * traceDistance, FQuat::Identity, ECC_Visibility, boxTrace);
+
+	keyCount++;
  
 }
 
@@ -122,6 +135,8 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Use");
+
+	currentAbilityPoints--;
 
 	return;
 }

@@ -20,34 +20,27 @@ UCLASS(config=Game)
 class ATheMazeCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-private:
 	
 	/** Current Health */
-	UPROPERTY(BlueprintReadOnly)
-	float currentHealth = 100.0f;
+	float currentHealth;
 
 	/** Current Ability Points */
-	UPROPERTY(BlueprintReadOnly)
-	int currentAbilityPoints = 100.0f;
+	int currentAbilityPoints;
 	
 	/** Number of Key owned */
-	UPROPERTY(BlueprintReadOnly)
-	int keyCount = 100.0f;
-
-public:
+	int keyCount;
 
 	/** Distance of the box trace */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true", ClampMin = 0.0f))
 	float traceDistance = 100.0f;
 
 	/** Maximum Health */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))
 	float maxHealth = 100.0f;
 
 	/** Maximum Ability Points */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
-	int maxAbilityPoints = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true", ClampMin = 1))
+	int maxAbilityPoints = 3;
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
@@ -108,6 +101,18 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+	/** Returns the percentage of health remaining **/
+	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	float GetPercentHealth() const { return currentHealth / maxHealth;  }
+
+	/** Returns the current ability points **/
+	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	int GetCurrentAbilityPoints() const { return currentAbilityPoints; }
+
+	/** Returns the current number of key owned **/
+	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	int GetKeyCount() const { return keyCount; }
 
 };
 

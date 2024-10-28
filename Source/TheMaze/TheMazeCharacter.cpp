@@ -49,6 +49,9 @@ ATheMazeCharacter::ATheMazeCharacter()
 	// Set Dead to false
 	dead = false;
 
+	// Set Default Player tag
+	Tags.Add("Player");
+
 }
 
 void ATheMazeCharacter::BeginPlay()

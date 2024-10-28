@@ -14,10 +14,15 @@ class THEMAZE_API ATriggerSpikes : public ATriggerBox
 {
 	GENERATED_BODY()
 
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-//	UStaticMeshComponent* SpikesMesh;
-//
-//public:
-//	ATriggerSpikes();
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* SpikesMesh;
+
+public:
+	ATriggerSpikes();
+
+	// Overlap Begin Event
+	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
+	// Overlap End Event
+	void OnEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 };

@@ -11,6 +11,8 @@
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
 
+#include "Interactable.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -49,15 +51,15 @@ ATheMazeCharacter::ATheMazeCharacter()
 	// Set Dead to false
 	dead = false;
 
-	// Set Default Player tag
-	Tags.Add("Player");
-
 }
 
 void ATheMazeCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	// Set Default Player tag
+	Tags.Add("Player");
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -125,17 +127,30 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	FHitResult outHit;
 
-	FCollisionShape boxTrace = FCollisionShape::MakeBox(FVector3f(30.0f, 120.0f, 30.0f));
+	FCollisionShape boxTrace = FCollisionShape::MakeBox(FVector3f(40.0f, 40.0f, 90.0f));
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * traceDistance;
 
-	GetWorld()->SweepSingleByChannel(outHit, GetActorLocation(), GetActorForwardVector() * traceDistance, FQuat::Identity, ECC_Visibility, boxTrace);
+	if (!GetWorld()->SweepSingleByChannel(outHit, Start, End, FQuat::Identity, ECC_Visibility, boxTrace)) return;
+
+	bool bIsImplemented = outHit.GetActor()->Implements<UInteractable>();
+
+	if (!bIsImplemented) return;
+
+	//outHit.GetActor()
 
 	// TEST START
+
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 5.0f, 0, 2.0f);
+
 	keyCount++;
 
 	HealCharacter(10.0f);
 
-	if (GEngine)
+	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), currentHealth));
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, FString::Printf(TEXT("Hit actor is: %s"), *outHit.GetActor()->GetName()));
+	}
 	// TEST END
  
 }

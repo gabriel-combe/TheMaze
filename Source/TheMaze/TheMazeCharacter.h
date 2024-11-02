@@ -14,6 +14,9 @@ class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
 
+/** Delegate for when the player dies **/
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerIsDead);
+
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
@@ -33,16 +36,20 @@ class ATheMazeCharacter : public ACharacter
 	/** Whether the character is dead or not */
 	bool dead;
 
+	/** Triggered when the player dies **/
+	UPROPERTY(BlueprintAssignable, Category = "Player|Health")
+	FPlayerIsDead OnPlayerDied;
+
 	/** Distance of the box trace */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true", ClampMin = 0.0f))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player", meta = (AllowPrivateAccess = "true", ClampMin = 0.0f))
 	float traceDistance = 100.0f;
 
 	/** Maximum Health */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))
 	float maxHealth = 100.0f;
 
 	/** Maximum Ability Points */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true", ClampMin = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int maxAbilityPoints = 3;
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
@@ -106,24 +113,26 @@ public:
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 	/** Returns the percentage of health remaining **/
-	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	UFUNCTION(BlueprintCallable, Category = "Player|Health")
 	float GetPercentHealth() const { return currentHealth / maxHealth;  }
 
 	/** Returns the current ability points **/
-	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	UFUNCTION(BlueprintCallable, Category = "Player|Ability")
 	int GetCurrentAbilityPoints() const { return currentAbilityPoints; }
 
 	/** Returns the current number of key owned **/
-	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	UFUNCTION(BlueprintCallable, Category = "Player|Key")
 	int GetKeyCount() const { return keyCount; }
 
 	/** Heal Character and returns whether it was successful or not **/
-	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	UFUNCTION(BlueprintCallable, Category = "Player|Health")
 	bool HealCharacter(const float HealAmount);
 
 	/** Damage Character and returns whether it was successful or not **/
-	UFUNCTION(BlueprintCallable, Category = "TheMaze")
+	UFUNCTION(BlueprintCallable, Category = "Player|Health")
 	bool DamageCharacter(const float DamageAmount);
+
+
 
 };
 

@@ -3,42 +3,67 @@
 
 #include "TriggerSpikes.h"
 
+#include "TheMazeCharacter.h"
+
+
 ATriggerSpikes::ATriggerSpikes()
 {
 
-	/*SpikesMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Spikes"));
-	SpikesMesh->SetupAttachment(RootComponent);
-	SpikesMesh->SetMobility(EComponentMobility::Static);
-	SpikesMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-	SpikesMesh->SetGenerateOverlapEvents(false);*/
+	BoxCollisionComponent = CastChecked<UBoxComponent>(GetCollisionComponent());
 
-	/*static ConstructorHelpers::FObjectFinder<UStaticMesh> ConeDefault(TEXT("/Engine/BasicShapes/Cone.Cone"));
+	SpikesMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Spikes"));
+	SpikesMesh->SetupAttachment(BoxCollisionComponent);
+	SpikesMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+	SpikesMesh->SetGenerateOverlapEvents(false);
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ConeDefault(TEXT("/Engine/BasicShapes/Cone.Cone"));
 	if (ConeDefault.Succeeded()) {
 		SpikesMesh->SetStaticMesh(ConeDefault.Object);
+		SpikesMesh->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
 		SpikesMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-	}*/
+	}
 
-
-	// Register Events
-	OnActorBeginOverlap.AddDynamic(this, &ATriggerSpikes::OnBeginOverlap);
-	OnActorEndOverlap.AddDynamic(this, &ATriggerSpikes::OnEndOverlap);
+	damage = FMath::Max(damage, 0.0f);
 }
 
-void ATriggerSpikes::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void ATriggerSpikes::BeginPlay()
+{
+	// Call the base class  
+	Super::BeginPlay();
+
+	// Register Events (Not working)
+	/*BoxCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ATriggerSpikes::DamagePlayer);
+	BoxCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ATriggerSpikes::ResetTimer);*/
+	OnActorBeginOverlap.AddDynamic(this, &ATriggerSpikes::DamagePlayer);
+	OnActorEndOverlap.AddDynamic(this, &ATriggerSpikes::ResetTimer);
+}
+
+void ATriggerSpikes::DamagePlayer(AActor* OverlappedComponent, AActor* OtherActor)
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, "BEGIN OVERLAP");
-
 	if (!OtherActor->ActorHasTag("Player")) return;
+
+	ATheMazeCharacter* player = Cast<ATheMazeCharacter>(OtherActor);
+
+	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATriggerSpikes::ApplyDamage, player);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Delegate, 0.5f, true, 0.0f);
 
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, "BEGIN OVERLAP");
 }
 
-void ATriggerSpikes::OnEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void ATriggerSpikes::ResetTimer(AActor* OverlappedComponent, AActor* OtherActor)
 {
 	if (!OtherActor->ActorHasTag("Player")) return;
+
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, "END OVERLAP");
+}
+
+void ATriggerSpikes::ApplyDamage(class ATheMazeCharacter* player)
+{
+	player->DamageCharacter(damage);
 }

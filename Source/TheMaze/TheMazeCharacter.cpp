@@ -12,6 +12,7 @@
 #include "Engine/LocalPlayer.h"
 
 #include "Interactable.h"
+#include "MazeData.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -46,7 +47,7 @@ ATheMazeCharacter::ATheMazeCharacter()
 	currentAbilityPoints = maxAbilityPoints;
 
 	// Set the number of Key to 0
-	keyCount = 0;
+	keyCount.Init(0, 3);
 
 	// Set Dead to false
 	dead = false;
@@ -133,11 +134,10 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	if (!GetWorld()->SweepSingleByChannel(outHit, Start, End, FQuat::Identity, ECC_Visibility, boxTrace)) return;
 
-	bool bIsImplemented = outHit.GetActor()->Implements<UInteractable>();
+	AActor* object = outHit.GetActor();
+	if (!object->GetClass()->ImplementsInterface(UInteractable::StaticClass())) return;
 
-	if (!bIsImplemented) return;
-
-	//outHit.GetActor()
+	IInteractable::Execute_Interact(object, this);
 
 	// TEST START
 
@@ -149,7 +149,7 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), currentHealth));
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, FString::Printf(TEXT("Hit actor is: %s"), *outHit.GetActor()->GetName()));
+		//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, FString::Printf(TEXT("Hit actor is: %s"), *outHit.GetActor()->GetName()));
 	}
 	// TEST END
  
@@ -193,6 +193,15 @@ bool ATheMazeCharacter::DamageCharacter(const float DamageAmount)
 	}
 
 	currentHealth = FMath::Clamp(currentHealth, 0.0f, maxHealth);
+
+	return true;
+}
+
+bool ATheMazeCharacter::FullHealCharacter()
+{
+	if (currentHealth == maxHealth) return false;
+
+	currentHealth = maxHealth;
 
 	return true;
 }

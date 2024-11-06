@@ -38,10 +38,15 @@ void AHealthPackItem::Tick(float DeltaTime)
 }
 
 // Implement the Interact function of the interface
-void AHealthPackItem::Interact()
+void AHealthPackItem::Interact_Implementation(ATheMazeCharacter* player)
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "HEALTHPACK INCOMING");
 
-	Destroy(true);
+	bool success = player->FullHealCharacter();
+
+	this->SetActorHiddenInGame(success);
+
+	if (success)
+		Destroy(true);
 }

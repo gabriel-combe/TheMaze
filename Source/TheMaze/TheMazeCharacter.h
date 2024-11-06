@@ -31,7 +31,7 @@ class ATheMazeCharacter : public ACharacter
 	int currentAbilityPoints;
 	
 	/** Number of Key owned */
-	int keyCount;
+	TArray<int32> keyCount;
 
 	/** Whether the character is dead or not */
 	bool dead;
@@ -132,7 +132,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player|Health")
 	bool DamageCharacter(const float DamageAmount);
 
-
-
+	/** Full heal the Character **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Health")
+	bool FullHealCharacter();
 };
-

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "TheMazeCharacter.h"
 #include "Interactable.generated.h"
 
 // This class does not need to be modified.
@@ -24,5 +25,6 @@ class THEMAZE_API IInteractable
 public:
 
 	//UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
-	virtual void Interact();
+	UFUNCTION(BlueprintNativeEvent, Category="Player|Interact")
+	void Interact(ATheMazeCharacter* player);
 };

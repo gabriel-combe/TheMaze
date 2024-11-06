@@ -20,12 +20,12 @@ public:
 	// Sets default values for this actor's properties
 	AHealthPackItem();
 
+	// Implement the Interact function of the interface
+	void Interact_Implementation(ATheMazeCharacter* player) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	// Implement the Interact function of the interface
-	virtual void Interact() override;
 
 public:	
 	// Called every frame

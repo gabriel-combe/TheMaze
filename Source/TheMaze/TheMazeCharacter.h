@@ -31,14 +31,21 @@ class ATheMazeCharacter : public ACharacter
 	int currentAbilityPoints;
 	
 	/** Number of Key owned */
-	TArray<int32> keyCount;
+	TArray<int> keyCount;
 
 	/** Whether the character is dead or not */
 	bool dead;
 
+	/** Game timer before death **/
+	FTimerHandle TimerHandleChrono;
+
 	/** Triggered when the player dies **/
 	UPROPERTY(BlueprintAssignable, Category = "Player|Health")
 	FPlayerIsDead OnPlayerDied;
+
+	/** Time for the chrono **/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Chrono", meta = (AllowPrivateAccess = "true"))
+	float ChronoTime;
 
 	/** Distance of the box trace */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player", meta = (AllowPrivateAccess = "true", ClampMin = 0.0f))
@@ -122,7 +129,11 @@ public:
 
 	/** Returns the current number of key owned **/
 	UFUNCTION(BlueprintCallable, Category = "Player|Key")
-	int GetKeyCount() const { return keyCount; }
+	int GetKeyCountByType(EKeyDoorTier keyType) const { return keyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))]; }
+
+	/** Get Remaining time in the chrono **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Chrono")
+	float GetRemainingTimePercent() const { return GetWorld()->GetTimerManager().GetTimerRemaining(TimerHandleChrono) / ChronoTime; };
 
 	/** Heal Character and returns whether it was successful or not **/
 	UFUNCTION(BlueprintCallable, Category = "Player|Health")
@@ -135,4 +146,28 @@ public:
 	/** Full heal the Character **/
 	UFUNCTION(BlueprintCallable, Category = "Player|Health")
 	bool FullHealCharacter();
+
+	/** Add keys in the array of key by its type **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Key")
+	void AddKeyByType(EKeyDoorTier keyType, int number);
+
+	/** Remove keys in the array of key by its type **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Key")
+	int RemoveKeyByType(EKeyDoorTier keyType, int number);
+
+	/** Remove an ability point **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Ability")
+	bool RemoveAbilityPoint();
+
+	/** Recover an ability point **/
+	void RecoverAbilityPoint();
+
+	/** Set player dead **/
+	UFUNCTION(BlueprintCallable, Category = "Player|State")
+	void SetDead() {
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "UR DEAD");
+
+		dead = true;
+	};
 };

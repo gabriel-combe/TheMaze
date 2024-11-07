@@ -47,11 +47,13 @@ ATheMazeCharacter::ATheMazeCharacter()
 	currentAbilityPoints = maxAbilityPoints;
 
 	// Set the number of Key to 0
-	keyCount.Init(0, 3);
+	keyCount.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
 
 	// Set Dead to false
 	dead = false;
 
+	// Set default chrono value
+	ChronoTime = 60.0f;
 }
 
 void ATheMazeCharacter::BeginPlay()
@@ -61,6 +63,9 @@ void ATheMazeCharacter::BeginPlay()
 
 	// Set Default Player tag
 	Tags.Add("Player");
+
+	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::SetDead);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleChrono, Delegate, ChronoTime, false);
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -143,9 +148,10 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 5.0f, 0, 2.0f);
 
-	keyCount++;
-
 	HealCharacter(10.0f);
+
+	AddKeyByType(EKeyDoorTier::KeyDoor_Uncommon, 5);
+	AddKeyByType(EKeyDoorTier::KeyDoor_Rare, 1);
 
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), currentHealth));
@@ -163,9 +169,13 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Use");
 
 	// TEST START
-	currentAbilityPoints--;
+	RemoveAbilityPoint();
 
 	DamageCharacter(15.0f);
+
+	RemoveKeyByType(EKeyDoorTier::KeyDoor_Common, 5);
+	RemoveKeyByType(EKeyDoorTier::KeyDoor_Uncommon, 2);
+	RemoveKeyByType(EKeyDoorTier::KeyDoor_Rare, 3);
 
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%d"), dead));
@@ -204,4 +214,37 @@ bool ATheMazeCharacter::FullHealCharacter()
 	currentHealth = maxHealth;
 
 	return true;
+}
+
+void ATheMazeCharacter::AddKeyByType(EKeyDoorTier keyType, int number)
+{
+	keyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))] += number;
+}
+
+int ATheMazeCharacter::RemoveKeyByType(EKeyDoorTier keyType, int number)
+{
+	int count = keyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))];
+	int rest = FMath::Max(number - count, 0);
+
+	keyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))] -= FMath::Min(count, number);
+
+	return rest;
+}
+
+bool ATheMazeCharacter::RemoveAbilityPoint()
+{
+	if (currentAbilityPoints <= 0) return false;
+
+	FTimerHandle TimerHandleAbility;
+	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::RecoverAbilityPoint);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleAbility, Delegate, 5.0f, false);
+	
+	currentAbilityPoints--;
+
+	return true;
+}
+
+void ATheMazeCharacter::RecoverAbilityPoint()
+{
+	currentAbilityPoints++;
 }

@@ -11,7 +11,7 @@ ATheMazeGameMode::ATheMazeGameMode()
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/FirstPerson/Blueprints/BP_FirstPersonCharacter"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
 
-	// set defqult hud class to our Blueprinted hud
+	// set default hud class to our Blueprinted hud
 	// static ConstructorHelpers::FClassFinder<> 
 
 }

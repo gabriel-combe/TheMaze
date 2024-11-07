@@ -15,14 +15,18 @@ class THEMAZE_API ATriggerSpikes : public ATriggerBox
 {
 	GENERATED_BODY()
 
+	// Damage done by the spikes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spike Properties", meta = (AllowPrivateAccess = "true"))
 	float damage = 10.0f;
 
+	// Timer for timed damage
 	FTimerHandle TimerHandle;
 
+	// Mesh of the spikes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* SpikesMesh;
 
+	// Ref to the collision component of the trigger box
 	UBoxComponent* BoxCollisionComponent;
 
 protected:

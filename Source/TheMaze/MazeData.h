@@ -6,10 +6,10 @@
 
 
 UENUM(BlueprintType)
-enum class EKeyType : uint8 {
-	Key_Common		UMETA(DisplayName = "Common"),
-	Key_Uncommon	UMETA(DisplayName = "Uncommon"),
-	Key_Rare		UMETA(DisplayName = "Rare"),
+enum class EKeyDoorTier : uint8 {
+	KeyDoor_Common		UMETA(DisplayName = "Common"),
+	KeyDoor_Uncommon	UMETA(DisplayName = "Uncommon"),
+	KeyDoor_Rare		UMETA(DisplayName = "Rare"),
 };
 
 /**

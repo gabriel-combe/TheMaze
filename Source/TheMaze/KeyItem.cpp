@@ -11,35 +11,31 @@ AKeyItem::AKeyItem()
 
 	KeyTier = EKeyDoorTier::KeyDoor_Common;
 
-	KeyItem = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Key"));
-	KeyItem->SetupAttachment(RootComponent);
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeDefault(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	if (CubeDefault.Succeeded()) {
-		KeyItem->SetStaticMesh(CubeDefault.Object);
-		KeyItem->SetRelativeScale3D(FVector(0.2f, 0.2f, 0.8f));
-		KeyItem->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-
-		
-		static ConstructorHelpers::FObjectFinder<UMaterialInstance> CommonMat(TEXT("/Game/Materials/M_KeyCommon.M_KeyCommon"));
-		static ConstructorHelpers::FObjectFinder<UMaterialInstance> UncommonMat(TEXT("/Game/Materials/M_KeyUncommon.M_KeyUncommon"));
-		static ConstructorHelpers::FObjectFinder<UMaterialInstance> RareMat(TEXT("/Game/Materials/M_KeyRare.M_KeyRare"));
-		
-		switch (KeyTier)
-		{
-		case EKeyDoorTier::KeyDoor_Common:
-			KeyItem->SetMaterial(0, CommonMat.Object);
-			break;
-		case EKeyDoorTier::KeyDoor_Uncommon:
-			KeyItem->SetMaterial(0, UncommonMat.Object);
-			break;
-		case EKeyDoorTier::KeyDoor_Rare:
-			KeyItem->SetMaterial(0, RareMat.Object);
-			break;
-		default:
-			break;
-		}
+	KeyItemComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Key"));
+	KeyItemComp->SetupAttachment(RootComponent);
+	KeyItemComp->SetCollisionProfileName(TEXT("IgnoreOnlyPawn"));
+	
+	KeyItemCommon = CreateDefaultSubobject<UStaticMesh>("KeyCommon");
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> KeyCommon(TEXT("/Game/Assets/Key_Common.Key_Common"));
+	if (KeyCommon.Succeeded()) {
+		KeyItemCommon = KeyCommon.Object;
 	}
+
+	KeyItemUncommon = CreateDefaultSubobject<UStaticMesh>("KeyUncommon");
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> KeyUncommon(TEXT("/Game/Assets/Key_Uncommon.Key_Uncommon"));
+	if (KeyUncommon.Succeeded()) {
+		KeyItemUncommon = KeyUncommon.Object;
+	}
+
+	KeyItemRare = CreateDefaultSubobject<UStaticMesh>("KeyRare");
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> KeyRare(TEXT("/Game/Assets/Key_Rare.Key_Rare"));
+	if (KeyRare.Succeeded()) {
+		KeyItemRare = KeyRare.Object;
+	}
+
+	KeyItemComp->SetStaticMesh(KeyItemCommon);
+	KeyItemComp->SetRelativeScale3D(FVector(0.2f, 0.2f, 0.2f));
+	KeyItemComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 
 }
 
@@ -47,7 +43,8 @@ AKeyItem::AKeyItem()
 void AKeyItem::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	UpdateKeyMesh();
 }
 
 // Called every frame
@@ -57,13 +54,56 @@ void AKeyItem::Tick(float DeltaTime)
 
 }
 
+#if WITH_EDITOR
+
+void AKeyItem::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	FName PropertyName = (PropertyChangedEvent.Property != nullptr)
+		? PropertyChangedEvent.Property->GetFName() : NAME_None;
+
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(AKeyItem, KeyTier))
+	{
+		UpdateKeyMesh();
+	}
+
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+#endif
+
 // Implement the Interact function of the interface
 void AKeyItem::Interact_Implementation(ATheMazeCharacter* player)
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "KEY RETRIEVED");
 
-	bool success = player->FullHealCharacter();
+	player->AddKeyByType(KeyTier, 1);
 
 	Destroy(true);
+}
+
+// Set the key tier
+void AKeyItem::SetTier(EKeyDoorTier keyTier)
+{
+	KeyTier = keyTier;
+
+	UpdateKeyMesh();
+}
+
+// Update the key mesh based on the key tier
+void AKeyItem::UpdateKeyMesh()
+{
+	switch (KeyTier)
+	{
+	case EKeyDoorTier::KeyDoor_Common:
+		KeyItemComp->SetStaticMesh(KeyItemCommon);
+		break;
+	case EKeyDoorTier::KeyDoor_Uncommon:
+		KeyItemComp->SetStaticMesh(KeyItemUncommon);
+		break;
+	case EKeyDoorTier::KeyDoor_Rare:
+		KeyItemComp->SetStaticMesh(KeyItemRare);
+		break;
+	default:
+		break;
+	}
 }

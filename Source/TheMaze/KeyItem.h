@@ -13,20 +13,40 @@ class THEMAZE_API AKeyItem : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 
-	// Mesh of the key
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* KeyItem;
+	// Mesh component of the key
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* KeyItemComp;
 
-	// Tier of the key
+	// Mesh of the common key
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
-	EKeyDoorTier KeyTier;
+	UStaticMesh* KeyItemCommon;
+
+	// Mesh of the uncommon key
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
+	UStaticMesh* KeyItemUncommon;
+
+	// Mesh of the rare key
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
+	UStaticMesh* KeyItemRare;
+
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	
 public:	
+
+	// Tier of the key
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tier")
+	EKeyDoorTier KeyTier;
+
 	// Sets default values for this actor's properties
 	AKeyItem();
 
 	// Implement the Interact function of the interface
 	void Interact_Implementation(ATheMazeCharacter* player) override;
+
+	// Set Key tier
+	void SetTier(EKeyDoorTier keyTier);
 
 protected:
 	// Called when the game starts or when spawned
@@ -35,5 +55,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+private:
+	// Update the key mesh based on the key tier
+	void UpdateKeyMesh();
 
 };

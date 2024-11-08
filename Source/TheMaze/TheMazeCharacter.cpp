@@ -150,9 +150,6 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	HealCharacter(10.0f);
 
-	AddKeyByType(EKeyDoorTier::KeyDoor_Uncommon, 5);
-	AddKeyByType(EKeyDoorTier::KeyDoor_Rare, 1);
-
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), currentHealth));
 		//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, FString::Printf(TEXT("Hit actor is: %s"), *outHit.GetActor()->GetName()));
@@ -172,10 +169,6 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 	RemoveAbilityPoint();
 
 	DamageCharacter(15.0f);
-
-	RemoveKeyByType(EKeyDoorTier::KeyDoor_Common, 5);
-	RemoveKeyByType(EKeyDoorTier::KeyDoor_Uncommon, 2);
-	RemoveKeyByType(EKeyDoorTier::KeyDoor_Rare, 3);
 
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%d"), dead));

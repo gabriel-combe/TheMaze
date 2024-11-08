@@ -11,7 +11,7 @@ AHealthPackItem::AHealthPackItem()
 
 	HealthPack = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HealthPack"));
 	HealthPack->SetupAttachment(RootComponent);
-	//HealthPack->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+	HealthPack->SetCollisionProfileName(TEXT("IgnoreOnlyPawn"));
 	//HealthPack->SetGenerateOverlapEvents(false);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereDefault(TEXT("/Engine/BasicShapes/Sphere.Sphere"));

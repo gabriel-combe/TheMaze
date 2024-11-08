@@ -31,9 +31,7 @@ void ATriggerSpikes::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	// Register Events (Not working)
-	/*BoxCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ATriggerSpikes::DamagePlayer);
-	BoxCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ATriggerSpikes::ResetTimer);*/
+	// Register Events
 	OnActorBeginOverlap.AddDynamic(this, &ATriggerSpikes::DamagePlayer);
 	OnActorEndOverlap.AddDynamic(this, &ATriggerSpikes::ResetTimer);
 }

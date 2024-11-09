@@ -1,9 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "MazeData.generated.h"
 
 
 UENUM(BlueprintType)
@@ -13,12 +12,21 @@ enum class EKeyDoorTier : uint8 {
 	KeyDoor_Rare		UMETA(DisplayName = "Rare"),
 };
 
-/**
- * 
- */
-//class THEMAZE_API MazeData
-//{
-//public:
-//	MazeData();
-//	~MazeData();
-//};
+
+USTRUCT(BlueprintType)
+struct FTierProperty : public FTableRowBase {
+	GENERATED_BODY()
+
+	// The enum tier type
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tiers")
+	EKeyDoorTier Tier;
+
+	// Colour of the tier
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tiers")
+	FColor  Colour;
+
+	// Probability of the tier
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tiers")
+	float Proba;
+
+};

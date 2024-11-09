@@ -38,15 +38,16 @@ ADoorObject::ADoorObject()
 
 	WidgetDoor = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetDoor"));
 
-	/*static ConstructorHelpers::FObjectFinder<TSubclassOf<UUserWidget>> widget(TEXT("WidgetBlueprint'/Game/HUD/W_DoorText.W_DoorText'"));
-	if (widget.Succeeded()) {
-		WidgetDoor->SetWidgetClass(*widget.Object);
-	}*/
-
+	WidgetDoor->SetWidgetClass(UDoorInfoWidget::StaticClass());
 	WidgetDoor->SetWidgetSpace(EWidgetSpace::World);
-	WidgetDoor->SetRelativeLocation(FVector(0.0f, 1.0f, 0.0f));
+	WidgetDoor->SetRelativeLocation(FVector(0.0f, 15.0f, 100.0f));
+	WidgetDoor->SetRelativeRotation(FQuat(FRotator(0.0f, 90.0f, 0.0f)));
 	WidgetDoor->SetupAttachment(RootComponent);
 	WidgetDoor->SetVisibility(true);
+
+	DoorInfo = Cast<UDoorInfoWidget>(WidgetDoor->GetWidget());
+	DoorInfo->SetText(FString::FromInt(RequiredKey));
+	DoorInfo->SetTextColour(FColor(1.0f, 1.0f, 1.0f, 1.0f));
 	
 }
 
@@ -55,7 +56,9 @@ void ADoorObject::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//WidgetDoor->InitWidget();
+	WidgetDoor->InitWidget();
+
+	UpdateDoorText();
 }
 
 // Called every frame
@@ -84,7 +87,7 @@ void ADoorObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
 
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(ADoorObject, DoorTier))
 	{
-		//UpdateDoorMesh();
+		UpdateDoorText();
 	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -98,13 +101,41 @@ void ADoorObject::Interact_Implementation(ATheMazeCharacter* player)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "DOOR OPENED");
 
 	RequiredKey = player->RemoveKeyByType(DoorTier, RequiredKey);
+
+	UpdateDoorText();
 	
 	if (RequiredKey == 0)
+	{
 		Open = true;
+		WidgetDoor->SetVisibility(false);
+	}
 }
 
 // Set the key tier
 void ADoorObject::SetTier(EKeyDoorTier doorTier)
 {
 	DoorTier = doorTier;
+
+	UpdateDoorText();
+}
+
+// Update the text of the door
+void ADoorObject::UpdateDoorText()
+{
+	DoorInfo->SetText(FString::FromInt(RequiredKey));
+
+	switch (DoorTier)
+	{
+	case EKeyDoorTier::KeyDoor_Common:
+		DoorInfo->SetTextColour(FColor(1.0f, 1.0f, 1.0f, 1.0f));
+		break;
+	case EKeyDoorTier::KeyDoor_Uncommon:
+		DoorInfo->SetTextColour(FColor(0.019608f, 0.423529f, 0.117647f, 1.0f));
+		break;
+	case EKeyDoorTier::KeyDoor_Rare:
+		DoorInfo->SetTextColour(FColor(0.52549f, 0.039216f, 0.023529f, 1.0f));
+		break;
+	default:
+		break;
+	}
 }

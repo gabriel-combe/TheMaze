@@ -3,21 +3,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/TextBlock.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetTree.h"
 #include "DoorInfoWidget.generated.h"
 
 
 /**
  * 
  */
-UCLASS(Abstract)
+UCLASS()
 class THEMAZE_API UDoorInfoWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+	TObjectPtr<UTexture2D> MultTex;
+
+	TObjectPtr<UTexture2D> KeyTex;
+
 public:
+
+	TObjectPtr<UHorizontalBox> HorizontalBox;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UTextBlock> KeyNumber;
@@ -29,7 +41,14 @@ public:
 	TObjectPtr<UImage> KeyImage;
 
 protected:
-	// Native construct to setup info
-	virtual void NativeConstruct() override;
-	
+	// Initialize all the Component of our widget
+	virtual void NativeOnInitialized() override;
+
+public:
+	// Set Door Text
+	UFUNCTION(BlueprintCallable)
+	void SetText(FString text);
+
+	// Set Door Text Colour
+	void SetTextColour(FColor colour);
 };

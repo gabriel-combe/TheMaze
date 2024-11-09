@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MazeData.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "TheMazeCharacter.generated.h"

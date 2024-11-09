@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "Interactable.h"
 #include "MazeData.h"
+#include "DoorInfoWidget.h"
 #include "Components/WidgetComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "GameFramework/Actor.h"
 #include "DoorObject.generated.h"
 
@@ -30,6 +30,13 @@ class THEMAZE_API ADoorObject : public AActor, public IInteractable
 	// Widget component of the door (for text display)
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UWidgetComponent> WidgetDoor;
+
+	//// User Widget to use for the door info
+	//UPROPERTY(EditAnywhere)
+	//TSubclassOf<UDoorInfoWidget> DoorInfoClass;
+
+	//// User Widget to use for the door info
+	TObjectPtr<UDoorInfoWidget> DoorInfo;
 
 	// Tell if the door is open
 	bool Open;
@@ -64,5 +71,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	// Update the text of the door
+	void UpdateDoorText();
 
 };

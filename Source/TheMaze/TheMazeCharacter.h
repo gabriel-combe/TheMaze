@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "MazeData.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Logging/LogMacros.h"
 #include "TheMazeCharacter.generated.h"
 
@@ -35,10 +36,38 @@ class ATheMazeCharacter : public ACharacter
 	TArray<int> keyCount;
 
 	/** Whether the character is dead or not */
-	bool dead;
+	bool Dead = false;
+
+	/** whether the character is invincible or not */
+	bool Invincible = false;
+
+	/** Base speed of the Player */
+	float SpeedBase;
+
+	/** Speed boost for the dash */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))
+	float SpeedBoostMultiplier = 2.0f;
+
+	/** Speed boost duration */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))
+	float SpeedBoostDuration = 5.0f;
+
+	/** Invincibility Duration */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))
+	float InvincibilityDuration = 2.0f;
+
+	/** Ability Point Recover duration */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))
+	float APRecoverDuration = 5.0f;
 
 	/** Game timer before death **/
 	FTimerHandle TimerHandleChrono;
+
+	/** Invincibility Timer **/
+	FTimerHandle TimerHandleInvincibility;
+
+	/** Speed Boost Timer **/
+	FTimerHandle TimerHandleSpeedBoost;
 
 	/** Triggered when the player dies **/
 	UPROPERTY(BlueprintAssignable, Category = "Player|Health")
@@ -46,7 +75,7 @@ class ATheMazeCharacter : public ACharacter
 
 	/** Time for the chrono **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Chrono", meta = (AllowPrivateAccess = "true"))
-	float ChronoTime;
+	float ChronoTime = 60.0f;
 
 	/** Distance of the box trace */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player", meta = (AllowPrivateAccess = "true", ClampMin = 0.0f))
@@ -59,6 +88,10 @@ class ATheMazeCharacter : public ACharacter
 	/** Maximum Ability Points */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int maxAbilityPoints = 3;
+
+	/** Dash distance */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true"))
+	float DashDistance = 4000.0f;
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
@@ -163,12 +196,30 @@ public:
 	/** Recover an ability point **/
 	void RecoverAbilityPoint();
 
+	/** Make the player dash in its movement direction or looking direction if standing still **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Ability")
+	void DashCharacter();
+
+	/** Activate Invincibility **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Ability")
+	void SetInvincibility();
+
+	/** Deactivate invincibility **/
+	void ResetInvincibility();
+
+	/** Activate Speed Boost **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Ability")
+	void GiveSpeedBoost();
+
+	/** Deactivate Speed Boost **/
+	void ResetSpeedBoost();
+
 	/** Set player dead **/
 	UFUNCTION(BlueprintCallable, Category = "Player|State")
 	void SetDead() {
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "UR DEAD");
 
-		dead = true;
+		Dead = true;
 	};
 };

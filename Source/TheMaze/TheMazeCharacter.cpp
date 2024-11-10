@@ -49,11 +49,8 @@ ATheMazeCharacter::ATheMazeCharacter()
 	// Set the number of Key to 0
 	keyCount.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
 
-	// Set Dead to false
-	dead = false;
-
-	// Set default chrono value
-	ChronoTime = 60.0f;
+	// Save the base max walk speed
+	SpeedBase = GetCharacterMovement()->MaxWalkSpeed;
 }
 
 void ATheMazeCharacter::BeginPlay()
@@ -165,14 +162,15 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Use");
 
-	// TEST START
-	RemoveAbilityPoint();
+	bool success = RemoveAbilityPoint();
 
-	DamageCharacter(15.0f);
+	if (!success) return;
 
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%d"), dead));
-	// TEST END
+	DashCharacter();
+
+	SetInvincibility();
+
+	GiveSpeedBoost();	
 }
 
 bool ATheMazeCharacter::HealCharacter(const float HealAmount)
@@ -188,10 +186,12 @@ bool ATheMazeCharacter::HealCharacter(const float HealAmount)
 
 bool ATheMazeCharacter::DamageCharacter(const float DamageAmount)
 {
+	if (Invincible) return false;
+
 	currentHealth -= DamageAmount;
 
 	if (currentHealth <= 0.0f) {
-		dead = true;
+		Dead = true;
 		return false;
 	}
 
@@ -230,7 +230,7 @@ bool ATheMazeCharacter::RemoveAbilityPoint()
 
 	FTimerHandle TimerHandleAbility;
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::RecoverAbilityPoint);
-	GetWorld()->GetTimerManager().SetTimer(TimerHandleAbility, Delegate, 5.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleAbility, Delegate, APRecoverDuration, false);
 	
 	currentAbilityPoints--;
 
@@ -240,4 +240,52 @@ bool ATheMazeCharacter::RemoveAbilityPoint()
 void ATheMazeCharacter::RecoverAbilityPoint()
 {
 	currentAbilityPoints++;
+}
+
+void ATheMazeCharacter::DashCharacter()
+{
+	FVector XYDir = GetVelocity() * (FVector::ForwardVector + FVector::RightVector);
+
+	if (XYDir.Length() < 0.01f)
+		XYDir = GetActorForwardVector();
+
+	XYDir.Normalize();
+
+	LaunchCharacter(XYDir * DashDistance, true, true);
+}
+
+/** Activate Invincibility **/
+void ATheMazeCharacter::SetInvincibility() {
+	// Clear any unfinished timer
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandleInvincibility);
+
+	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::ResetInvincibility);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleInvincibility, Delegate, InvincibilityDuration, false);
+
+	Invincible = true;
+}
+
+/** Deactivate invincibility **/
+void ATheMazeCharacter::ResetInvincibility() {
+	Invincible = false;
+}
+
+/** Activate Speed Boost **/
+void ATheMazeCharacter::GiveSpeedBoost() {
+	// Clear any unfinished timer
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandleSpeedBoost);
+	GetCharacterMovement()->MaxWalkSpeed = SpeedBase;
+
+	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::ResetSpeedBoost);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleSpeedBoost, Delegate, SpeedBoostDuration, false);
+
+	GetCharacterMovement()->MaxWalkSpeed = SpeedBase * SpeedBoostMultiplier;
+}
+
+/** Deactivate Speed Boost **/
+void ATheMazeCharacter::ResetSpeedBoost() {
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "RESET SPEED BOOST");
+
+	GetCharacterMovement()->MaxWalkSpeed = SpeedBase;
 }

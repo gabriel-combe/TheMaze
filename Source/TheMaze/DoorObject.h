@@ -28,14 +28,14 @@ class THEMAZE_API ADoorObject : public AActor, public IInteractable
 	TObjectPtr<UStaticMeshComponent> DoorRComp;
 
 	// Widget component of the door (for text display)
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UWidgetComponent> WidgetDoor;
 
-	//// User Widget to use for the door info
-	//UPROPERTY(EditAnywhere)
-	//TSubclassOf<UDoorInfoWidget> DoorInfoClass;
+	// User Widget Class to use for the door info
+	UPROPERTY(EditAnywhere, Category = "Tier", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UDoorInfoWidget> DoorInfoClass;
 
-	//// User Widget to use for the door info
+	// User Widget to use for the door info
 	TObjectPtr<UDoorInfoWidget> DoorInfo;
 
 	// Tell if the door is open

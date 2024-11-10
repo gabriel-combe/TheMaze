@@ -18,37 +18,31 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class THEMAZE_API UDoorInfoWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-	TObjectPtr<UTexture2D> MultTex;
-
-	TObjectPtr<UTexture2D> KeyTex;
-
 public:
-
-	TObjectPtr<UHorizontalBox> HorizontalBox;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  meta = (BindWidget))
 	TObjectPtr<UTextBlock> KeyNumber;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UImage> MultiplyImage;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UImage> KeyImage;
 
 protected:
 	// Initialize all the Component of our widget
-	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
 
 public:
 	// Set Door Text
 	UFUNCTION(BlueprintCallable)
 	void SetText(FString text);
 
-	// Set Door Text Colour
-	void SetTextColour(FColor colour);
+	// Set Door Text and Image Colour
+	UFUNCTION(BlueprintCallable)
+	void SetColour(FColor colour);
 };

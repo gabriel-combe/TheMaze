@@ -10,7 +10,7 @@ ADoorObject::ADoorObject()
 	PrimaryActorTick.bCanEverTick = true;
 
 	DoorTier = EKeyDoorTier::KeyDoor_Common;
-	RequiredKey = 1;
+	RequiredKey = 5;
 
 	// Create scene root component
 	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
@@ -32,23 +32,22 @@ ADoorObject::ADoorObject()
 		DoorRComp->SetStaticMesh(DoorR.Object);
 	}
 
-	DoorLComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	DoorLComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f)); 
 	DoorRComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 
 
 	WidgetDoor = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetDoor"));
-
-	WidgetDoor->SetWidgetClass(UDoorInfoWidget::StaticClass());
-	WidgetDoor->SetWidgetSpace(EWidgetSpace::World);
-	WidgetDoor->SetRelativeLocation(FVector(0.0f, 15.0f, 100.0f));
-	WidgetDoor->SetRelativeRotation(FQuat(FRotator(0.0f, 90.0f, 0.0f)));
 	WidgetDoor->SetupAttachment(RootComponent);
-	WidgetDoor->SetVisibility(true);
 
-	DoorInfo = Cast<UDoorInfoWidget>(WidgetDoor->GetWidget());
-	DoorInfo->SetText(FString::FromInt(RequiredKey));
-	DoorInfo->SetTextColour(FColor(1.0f, 1.0f, 1.0f, 1.0f));
-	
+	/*if (DoorInfoClass)
+		WidgetDoor->SetWidgetClass(DoorInfoClass);*/
+
+	WidgetDoor->SetWidgetSpace(EWidgetSpace::World);
+	WidgetDoor->SetRelativeLocation(FVector(10.0f, 15.0f, 100.0f));
+	WidgetDoor->SetRelativeRotation(FQuat(FRotator(0.0f, 90.0f, 0.0f)));
+	//WidgetDoor->SetVisibility(true);
+
+	//DoorInfo = Cast<UDoorInfoWidget>(WidgetDoor->GetUserWidgetObject());
 }
 
 // Called when the game starts or when spawned
@@ -56,9 +55,14 @@ void ADoorObject::BeginPlay()
 {
 	Super::BeginPlay();
 
-	WidgetDoor->InitWidget();
+	/*if (DoorInfoClass)
+		WidgetDoor->SetWidgetClass(DoorInfoClass);*/
 
-	UpdateDoorText();
+	//WidgetDoor->InitWidget();
+
+	//DoorInfo = Cast<UDoorInfoWidget>(WidgetDoor->GetUserWidgetObject());
+
+	//UpdateDoorText();
 }
 
 // Called every frame
@@ -87,7 +91,7 @@ void ADoorObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
 
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(ADoorObject, DoorTier))
 	{
-		UpdateDoorText();
+		//UpdateDoorText();
 	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -98,17 +102,20 @@ void ADoorObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
 void ADoorObject::Interact_Implementation(ATheMazeCharacter* player)
 {
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "DOOR OPENED");
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "Try to open Door");
 
 	RequiredKey = player->RemoveKeyByType(DoorTier, RequiredKey);
 
-	UpdateDoorText();
+	//UpdateDoorText();
 	
 	if (RequiredKey == 0)
 	{
 		Open = true;
 		WidgetDoor->SetVisibility(false);
 	}
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "DOOR OPENED");
 }
 
 // Set the key tier
@@ -116,24 +123,26 @@ void ADoorObject::SetTier(EKeyDoorTier doorTier)
 {
 	DoorTier = doorTier;
 
-	UpdateDoorText();
+	//UpdateDoorText();
 }
 
 // Update the text of the door
 void ADoorObject::UpdateDoorText()
 {
+	if (!DoorInfo) return;
+
 	DoorInfo->SetText(FString::FromInt(RequiredKey));
 
 	switch (DoorTier)
 	{
 	case EKeyDoorTier::KeyDoor_Common:
-		DoorInfo->SetTextColour(FColor(1.0f, 1.0f, 1.0f, 1.0f));
+		DoorInfo->SetColour(FColor(1.0f, 1.0f, 1.0f, 1.0f));
 		break;
 	case EKeyDoorTier::KeyDoor_Uncommon:
-		DoorInfo->SetTextColour(FColor(0.019608f, 0.423529f, 0.117647f, 1.0f));
+		DoorInfo->SetColour(FColor(0.019608f, 0.423529f, 0.117647f, 1.0f));
 		break;
 	case EKeyDoorTier::KeyDoor_Rare:
-		DoorInfo->SetTextColour(FColor(0.52549f, 0.039216f, 0.023529f, 1.0f));
+		DoorInfo->SetColour(FColor(0.52549f, 0.039216f, 0.023529f, 1.0f));
 		break;
 	default:
 		break;

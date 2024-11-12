@@ -70,6 +70,7 @@ void ADoorObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Rotate Doors
 	if (Open) {
 		FQuat newRotL = FMath::Lerp(FQuat(DoorLComp->GetRelativeRotation()), FQuat(FRotator(0.0f, 90.0f, 0.0f)), 0.01f);
 		DoorLComp->SetRelativeRotation(newRotL);
@@ -105,8 +106,6 @@ void ADoorObject::Interact_Implementation(ATheMazeCharacter* player)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "Try to open Door");
 
 	RequiredKey = player->RemoveKeyByType(DoorTier, RequiredKey);
-
-	//UpdateDoorText();
 	
 	if (RequiredKey == 0)
 	{
@@ -122,8 +121,6 @@ void ADoorObject::Interact_Implementation(ATheMazeCharacter* player)
 void ADoorObject::SetTier(EKeyDoorTier doorTier)
 {
 	DoorTier = doorTier;
-
-	//UpdateDoorText();
 }
 
 // Update the text of the door

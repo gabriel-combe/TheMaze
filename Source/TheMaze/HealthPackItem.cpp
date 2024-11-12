@@ -9,10 +9,13 @@ AHealthPackItem::AHealthPackItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Create scene root component
+	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
+	SetRootComponent(DefaultSceneRoot);
+
 	HealthPack = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HealthPack"));
 	HealthPack->SetupAttachment(RootComponent);
 	HealthPack->SetCollisionProfileName(TEXT("IgnoreOnlyPawn"));
-	//HealthPack->SetGenerateOverlapEvents(false);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereDefault(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	if (SphereDefault.Succeeded()) {

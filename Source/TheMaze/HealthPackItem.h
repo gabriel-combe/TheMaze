@@ -13,6 +13,10 @@ class THEMAZE_API AHealthPackItem : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 
+	// Scene Component
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USceneComponent> DefaultSceneRoot;
+
 	// Mesh of the health pack
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* HealthPack;

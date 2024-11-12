@@ -27,13 +27,13 @@ class ATheMazeCharacter : public ACharacter
 	GENERATED_BODY()
 	
 	/** Current Health */
-	float currentHealth;
+	float CurrentHealth;
 
 	/** Current Ability Points */
-	int currentAbilityPoints;
+	int CurrentAbilityPoints;
 	
 	/** Number of Key owned */
-	TArray<int> keyCount;
+	TArray<int> KeyCount;
 
 	/** Whether the character is dead or not */
 	bool Dead = false;
@@ -79,15 +79,15 @@ class ATheMazeCharacter : public ACharacter
 
 	/** Distance of the box trace */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player", meta = (AllowPrivateAccess = "true", ClampMin = 0.0f))
-	float traceDistance = 100.0f;
+	float TraceDistance = 100.0f;
 
 	/** Maximum Health */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))
-	float maxHealth = 100.0f;
+	float MaxHealth = 100.0f;
 
 	/** Maximum Ability Points */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true", ClampMin = 1))
-	int maxAbilityPoints = 3;
+	int MaxAbilityPoints = 3;
 
 	/** Dash distance */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true"))
@@ -155,15 +155,15 @@ public:
 
 	/** Returns the percentage of health remaining **/
 	UFUNCTION(BlueprintCallable, Category = "Player|Health")
-	float GetPercentHealth() const { return currentHealth / maxHealth;  }
+	float GetPercentHealth() const { return CurrentHealth / MaxHealth;  }
 
 	/** Returns the current ability points **/
 	UFUNCTION(BlueprintCallable, Category = "Player|Ability")
-	int GetCurrentAbilityPoints() const { return currentAbilityPoints; }
+	int GetCurrentAbilityPoints() const { return CurrentAbilityPoints; }
 
 	/** Returns the current number of key owned **/
 	UFUNCTION(BlueprintCallable, Category = "Player|Key")
-	int GetKeyCountByType(EKeyDoorTier keyType) const { return keyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))]; }
+	int GetKeyCountByType(EKeyDoorTier keyType) const { return KeyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))]; }
 
 	/** Get Remaining time in the chrono **/
 	UFUNCTION(BlueprintCallable, Category = "Player|Chrono")

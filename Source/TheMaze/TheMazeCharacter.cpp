@@ -41,13 +41,13 @@ ATheMazeCharacter::ATheMazeCharacter()
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
 	// Set Health to max Health
-	currentHealth = maxHealth;
+	CurrentHealth = MaxHealth;
 
 	// Set Ability Points to max Ability Points
-	currentAbilityPoints = maxAbilityPoints;
+	CurrentAbilityPoints = MaxAbilityPoints;
 
 	// Set the number of Key to 0
-	keyCount.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
+	KeyCount.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
 
 	// Save the base max walk speed
 	SpeedBase = GetCharacterMovement()->MaxWalkSpeed;
@@ -132,12 +132,15 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	FCollisionShape boxTrace = FCollisionShape::MakeBox(FVector3f(40.0f, 40.0f, 90.0f));
 	FVector Start = GetActorLocation();
-	FVector End = Start + GetActorForwardVector() * traceDistance;
+	FVector End = Start + GetActorForwardVector() * TraceDistance;
 
 	if (!GetWorld()->SweepSingleByChannel(outHit, Start, End, FQuat::Identity, ECC_Visibility, boxTrace)) return;
 
 	AActor* object = outHit.GetActor();
 	if (!object->GetClass()->ImplementsInterface(UInteractable::StaticClass())) return;
+
+	if (GEngine) 
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, FString::Printf(TEXT("Hit actor is: %s"), *object->GetName()));
 
 	IInteractable::Execute_Interact(object, this);
 
@@ -147,10 +150,8 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	HealCharacter(10.0f);
 
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), currentHealth));
-		//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, FString::Printf(TEXT("Hit actor is: %s"), *outHit.GetActor()->GetName()));
-	}
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), CurrentHealth));
 	// TEST END
  
 }
@@ -175,71 +176,72 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 
 bool ATheMazeCharacter::HealCharacter(const float HealAmount)
 {
-	if (currentAbilityPoints >= maxHealth) return false;
+	if (CurrentAbilityPoints >= MaxHealth) return false;
 
-	currentHealth += HealAmount;
+	CurrentHealth += HealAmount;
 
-	currentHealth = FMath::Clamp(currentHealth, 0.0f, maxHealth);
+	CurrentHealth = FMath::Clamp(CurrentHealth, 0.0f, MaxHealth);
 
 	return true;
 }
 
 bool ATheMazeCharacter::DamageCharacter(const float DamageAmount)
 {
-	if (Invincible) return false;
+	if (Invincible || Dead) return false;
 
-	currentHealth -= DamageAmount;
+	CurrentHealth -= DamageAmount;
 
-	if (currentHealth <= 0.0f) {
-		Dead = true;
+	if (CurrentHealth <= 0.0f) {
+		SetDead();
 		return false;
 	}
 
-	currentHealth = FMath::Clamp(currentHealth, 0.0f, maxHealth);
+	CurrentHealth = FMath::Clamp(CurrentHealth, 0.0f, MaxHealth);
 
 	return true;
 }
 
 bool ATheMazeCharacter::FullHealCharacter()
 {
-	if (currentHealth == maxHealth) return false;
+	if (CurrentHealth == MaxHealth) return false;
 
-	currentHealth = maxHealth;
+	CurrentHealth = MaxHealth;
 
 	return true;
 }
 
 void ATheMazeCharacter::AddKeyByType(EKeyDoorTier keyType, int number)
 {
-	keyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))] += number;
+	KeyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))] += number;
 }
 
 int ATheMazeCharacter::RemoveKeyByType(EKeyDoorTier keyType, int number)
 {
-	int count = keyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))];
+	int count = KeyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))];
 	int rest = FMath::Max(number - count, 0);
 
-	keyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))] -= FMath::Min(count, number);
+	KeyCount[StaticEnum<EKeyDoorTier>()->GetIndexByValue(int64(keyType))] -= FMath::Min(count, number);
 
 	return rest;
 }
 
 bool ATheMazeCharacter::RemoveAbilityPoint()
 {
-	if (currentAbilityPoints <= 0) return false;
+	if (CurrentAbilityPoints <= 0) return false;
 
+	// Create a timer to reset the ability point
 	FTimerHandle TimerHandleAbility;
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::RecoverAbilityPoint);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleAbility, Delegate, APRecoverDuration, false);
 	
-	currentAbilityPoints--;
+	CurrentAbilityPoints--;
 
 	return true;
 }
 
 void ATheMazeCharacter::RecoverAbilityPoint()
 {
-	currentAbilityPoints++;
+	CurrentAbilityPoints++;
 }
 
 void ATheMazeCharacter::DashCharacter()
@@ -254,8 +256,8 @@ void ATheMazeCharacter::DashCharacter()
 	LaunchCharacter(XYDir * DashDistance, true, true);
 }
 
-/** Activate Invincibility **/
-void ATheMazeCharacter::SetInvincibility() {
+void ATheMazeCharacter::SetInvincibility()
+{
 	// Clear any unfinished timer
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandleInvincibility);
 
@@ -265,13 +267,13 @@ void ATheMazeCharacter::SetInvincibility() {
 	Invincible = true;
 }
 
-/** Deactivate invincibility **/
-void ATheMazeCharacter::ResetInvincibility() {
+void ATheMazeCharacter::ResetInvincibility()
+{
 	Invincible = false;
 }
 
-/** Activate Speed Boost **/
-void ATheMazeCharacter::GiveSpeedBoost() {
+void ATheMazeCharacter::GiveSpeedBoost()
+{
 	// Clear any unfinished timer
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandleSpeedBoost);
 	GetCharacterMovement()->MaxWalkSpeed = SpeedBase;
@@ -282,10 +284,7 @@ void ATheMazeCharacter::GiveSpeedBoost() {
 	GetCharacterMovement()->MaxWalkSpeed = SpeedBase * SpeedBoostMultiplier;
 }
 
-/** Deactivate Speed Boost **/
-void ATheMazeCharacter::ResetSpeedBoost() {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "RESET SPEED BOOST");
-
+void ATheMazeCharacter::ResetSpeedBoost()
+{
 	GetCharacterMovement()->MaxWalkSpeed = SpeedBase;
 }

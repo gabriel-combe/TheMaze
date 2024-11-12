@@ -13,6 +13,10 @@ class THEMAZE_API AKeyItem : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 
+	// Scene Component
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USceneComponent> DefaultSceneRoot;
+
 	// Mesh component of the key
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* KeyItemComp;

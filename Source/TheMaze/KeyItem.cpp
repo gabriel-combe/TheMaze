@@ -11,10 +11,16 @@ AKeyItem::AKeyItem()
 
 	KeyTier = EKeyDoorTier::KeyDoor_Common;
 
+	// Create scene root component
+	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
+	SetRootComponent(DefaultSceneRoot);
+
+	// Set Mesh Component properties
 	KeyItemComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Key"));
 	KeyItemComp->SetupAttachment(RootComponent);
 	KeyItemComp->SetCollisionProfileName(TEXT("IgnoreOnlyPawn"));
 	
+	// Nee to modify the material and not the mesh
 	KeyItemCommon = CreateDefaultSubobject<UStaticMesh>("KeyCommon");
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> KeyCommon(TEXT("/Game/Assets/Key_Common.Key_Common"));
 	if (KeyCommon.Succeeded()) {

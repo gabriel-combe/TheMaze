@@ -12,6 +12,7 @@
 #include "Engine/LocalPlayer.h"
 
 #include "Interactable.h"
+#include "HUDInterface.h"
 #include "MazeData.h"
 
 
@@ -61,8 +62,19 @@ void ATheMazeCharacter::BeginPlay()
 	// Set Default Player tag
 	Tags.Add("Player");
 
+	// Get the maze game instance
+	MazeGI = CastChecked<UMazeGameInstance>(GetGameInstance());
+
+	// Set chrono time
+	ChronoTime = MazeGI->ChronoTime;
+
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::SetDead);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleChrono, Delegate, ChronoTime, false);
+
+	// Get the player s HUD
+	TObjectPtr<AMazeHUD> hud = CastChecked<AMazeHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	if (hud->GetClass()->ImplementsInterface(UHUDInterface::StaticClass()))
+		PlayerMazeHUD = hud;
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -87,6 +99,9 @@ void ATheMazeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		// Using
 		EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Triggered, this, &ATheMazeCharacter::Use);
+
+		// Pausing
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &ATheMazeCharacter::Pause);
 	}
 	else
 	{
@@ -150,8 +165,10 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	HealCharacter(10.0f);
 
-	if (GEngine)
+	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), CurrentHealth));
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), CurrentHealth));
+	}
 	// TEST END
  
 }
@@ -174,9 +191,16 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 	GiveSpeedBoost();	
 }
 
+void ATheMazeCharacter::Pause(const FInputActionValue& Value)
+{
+	if (!PlayerMazeHUD) return;
+
+	IHUDInterface::Execute_ActivatePause(PlayerMazeHUD);
+}
+
 bool ATheMazeCharacter::HealCharacter(const float HealAmount)
 {
-	if (CurrentAbilityPoints >= MaxHealth) return false;
+	if (CurrentHealth >= MaxHealth) return false;
 
 	CurrentHealth += HealAmount;
 

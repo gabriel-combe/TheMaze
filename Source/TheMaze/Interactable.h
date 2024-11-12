@@ -25,6 +25,7 @@ class THEMAZE_API IInteractable
 public:
 
 	//UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	// Called when the player interact with object
 	UFUNCTION(BlueprintNativeEvent, Category="Player|Interact")
 	void Interact(ATheMazeCharacter* player);
 };

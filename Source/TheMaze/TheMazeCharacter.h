@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "MazeData.h"
+#include "MazeHUD.h"
+#include "MazeGameInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Logging/LogMacros.h"
@@ -73,6 +75,9 @@ class ATheMazeCharacter : public ACharacter
 	UPROPERTY(BlueprintAssignable, Category = "Player|Health")
 	FPlayerIsDead OnPlayerDied;
 
+	/** HUD used by the player **/
+	TObjectPtr<AMazeHUD> PlayerMazeHUD;
+
 	/** Time for the chrono **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Chrono", meta = (AllowPrivateAccess = "true"))
 	float ChronoTime = 60.0f;
@@ -92,6 +97,9 @@ class ATheMazeCharacter : public ACharacter
 	/** Dash distance */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true"))
 	float DashDistance = 4000.0f;
+
+	/** Maze game instance */
+	TObjectPtr<UMazeGameInstance> MazeGI;
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
@@ -113,9 +121,13 @@ class ATheMazeCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
 
-	/** Interact Input Action */
+	/** Use Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* UseAction;
+
+	/** Pause Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PauseAction;
 	
 public:
 	ATheMazeCharacter();
@@ -142,6 +154,9 @@ protected:
 	/** Called for use input */
 	void Use(const FInputActionValue& Value);
 
+	/** Called for pause input */
+	void Pause(const FInputActionValue& Value);
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -150,6 +165,7 @@ protected:
 public:
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 

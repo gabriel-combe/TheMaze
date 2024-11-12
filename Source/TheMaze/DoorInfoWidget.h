@@ -18,7 +18,7 @@
 /**
  * 
  */
-UCLASS(Abstract)
+UCLASS()
 class THEMAZE_API UDoorInfoWidget : public UUserWidget
 {
 	GENERATED_BODY()

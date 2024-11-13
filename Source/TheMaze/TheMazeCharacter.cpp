@@ -52,6 +52,9 @@ ATheMazeCharacter::ATheMazeCharacter()
 
 	// Save the base max walk speed
 	SpeedBase = GetCharacterMovement()->MaxWalkSpeed;
+
+	// Call the stimulus setup function
+	SetupStimulusSource();
 }
 
 void ATheMazeCharacter::BeginPlay()
@@ -189,6 +192,15 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 	SetInvincibility();
 
 	GiveSpeedBoost();	
+}
+
+void ATheMazeCharacter::SetupStimulusSource()
+{
+	StimulusSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("Stimulus"));
+	if (!StimulusSource) return;
+
+	StimulusSource->RegisterForSense(TSubclassOf<UAISense_Sight>());
+	StimulusSource->RegisterWithPerceptionSystem();
 }
 
 void ATheMazeCharacter::Pause(const FInputActionValue& Value)

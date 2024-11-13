@@ -6,6 +6,8 @@
 #include "MazeData.h"
 #include "MazeHUD.h"
 #include "MazeGameInstance.h"
+#include "Perception/AISense_Sight.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Logging/LogMacros.h"
@@ -128,6 +130,13 @@ class ATheMazeCharacter : public ACharacter
 	/** Pause Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PauseAction;
+
+	// Stimulus source of the player used by the monster ai
+	class UAIPerceptionStimuliSourceComponent* StimulusSource;
+
+	// Setup of the stimulus source
+	void SetupStimulusSource();
+
 	
 public:
 	ATheMazeCharacter();

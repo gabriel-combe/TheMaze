@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/GameplayStatics.h"
+#include "MonsterAIController.h"
 #include "TheMazeCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"

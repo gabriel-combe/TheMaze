@@ -52,4 +52,6 @@ void AMonsterAIController::OnTargetDetected(AActor* Actor, const FAIStimulus Sti
 	if (!Player) return;
 
 	GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", Stimulus.WasSuccessfullySensed());
+
+	IsPlayerInSight = Stimulus.WasSuccessfullySensed();
 }

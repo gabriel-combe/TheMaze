@@ -33,5 +33,9 @@ protected:
 
 public:
 	AMonsterAIController();
+
+	// Tell if the player in in sight
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	bool IsPlayerInSight = false;
 	
 };

@@ -32,10 +32,10 @@ void AMonsterAIController::SetupPerceptionSystem()
 	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component")));
 
 	SightConfig->SightRadius = 800.0f;
-	SightConfig->LoseSightRadius = SightConfig->SightRadius + 100.0f;
+	SightConfig->LoseSightRadius = SightConfig->SightRadius * 2;
 	SightConfig->PeripheralVisionAngleDegrees = 120.0f;
 	SightConfig->SetMaxAge(15.0f);
-	SightConfig->AutoSuccessRangeFromLastSeenLocation = 830.0f;
+	SightConfig->AutoSuccessRangeFromLastSeenLocation = 1200.0f;
 	SightConfig->DetectionByAffiliation.bDetectEnemies = false;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;

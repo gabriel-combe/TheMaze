@@ -15,6 +15,7 @@ class THEMAZE_API ADoorObject : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 
+private:
 	// Scene Component
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USceneComponent> DefaultSceneRoot;
@@ -45,6 +46,10 @@ class THEMAZE_API ADoorObject : public AActor, public IInteractable
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 	
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 public:	
 
 	// Tier of the door
@@ -64,11 +69,6 @@ public:
 	// Set Door tier
 	void SetTier(EKeyDoorTier doorTier);
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

@@ -15,6 +15,7 @@ class THEMAZE_API ATriggerSpikes : public ATriggerBox
 {
 	GENERATED_BODY()
 
+private:
 	// Damage done by the spikes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spike Properties", meta = (AllowPrivateAccess = "true"))
 	float damage = 10.0f;

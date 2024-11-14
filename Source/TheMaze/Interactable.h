@@ -23,8 +23,6 @@ class THEMAZE_API IInteractable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-
-	//UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	// Called when the player interact with object
 	UFUNCTION(BlueprintNativeEvent, Category="Player|Interact")
 	void Interact(ATheMazeCharacter* player);

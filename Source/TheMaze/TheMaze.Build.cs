@@ -15,7 +15,7 @@ public class TheMaze : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"UMG",
-			"AImodule",
+			"AIModule",
 			"GameplayTasks",
 			"NavigationSystem"
 		});

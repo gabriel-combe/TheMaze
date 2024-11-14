@@ -23,6 +23,10 @@ class THEMAZE_API UDoorInfoWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+protected:
+	// Initialize all the Component of our widget
+	virtual void NativeConstruct() override;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,  meta = (BindWidget))
 	TObjectPtr<UTextBlock> KeyNumber;
@@ -33,11 +37,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UImage> KeyImage;
 
-protected:
-	// Initialize all the Component of our widget
-	virtual void NativeConstruct() override;
-
-public:
 	// Set Door Text
 	UFUNCTION(BlueprintCallable)
 	void SetText(FString text);

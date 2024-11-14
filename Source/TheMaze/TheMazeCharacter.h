@@ -30,6 +30,7 @@ class ATheMazeCharacter : public ACharacter
 {
 	GENERATED_BODY()
 	
+private:
 	/** Current Health */
 	float CurrentHealth;
 
@@ -137,20 +138,9 @@ class ATheMazeCharacter : public ACharacter
 	// Setup of the stimulus source
 	void SetupStimulusSource();
 
-	
-public:
-	ATheMazeCharacter();
-
 protected:
 	virtual void BeginPlay();
 
-public:
-		
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
-
-protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -166,12 +156,17 @@ protected:
 	/** Called for pause input */
 	void Pause(const FInputActionValue& Value);
 
-protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
-
+	
 public:
+	ATheMazeCharacter();
+		
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LookAction;
+
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 
@@ -241,10 +236,5 @@ public:
 
 	/** Set player dead **/
 	UFUNCTION(BlueprintCallable, Category = "Player|State")
-	void SetDead() {
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "UR DEAD");
-
-		Dead = true;
-	};
+	void SetDead();
 };

@@ -324,3 +324,11 @@ void ATheMazeCharacter::ResetSpeedBoost()
 {
 	GetCharacterMovement()->MaxWalkSpeed = SpeedBase;
 }
+
+void ATheMazeCharacter::SetDead()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "UR DEAD");
+
+	Dead = true;
+}

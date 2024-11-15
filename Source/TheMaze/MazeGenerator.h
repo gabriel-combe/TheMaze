@@ -16,21 +16,19 @@ class THEMAZE_API AMazeGenerator : public AActor
 
 private:
 	// Position of the origin point
-	FIntVector2 Origin;
+	FVector2D Origin;
 
 	// Position of the next origin point
-	FIntVector2 NextOrigin;
+	FVector2D NextOrigin;
 
 	// Array of possible direction
-	TArray<FIntVector2> PossibleDirection = TArray<FIntVector2>({
-		FIntVector2(-1, 0),
-		FIntVector2(0, -1),
-		FIntVector2(1, 0),
-		FIntVector2(0, 1)
-	});
+	TArray<FVector2D> PossibleDirection;
 
 	/** Maze game instance */
 	TObjectPtr<UMazeGameInstance> MazeGI;
+
+	// Scene Component
+	TObjectPtr<USceneComponent> DefaultSceneRoot;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -54,7 +52,7 @@ protected:
 
 	// Size of each cell of the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings", meta = (ClampMin = "20.0", UIMin = "20.0"))
-	float CellSize;
+	float CellSize = 200;
 
 	// 1D array representing the 2D Maze (contain nodes)
 	UPROPERTY(BlueprintReadOnly)
@@ -66,5 +64,9 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	// Generate a new Maze map (default map)
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	void NewMazeMap();
 
 };

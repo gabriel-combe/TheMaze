@@ -168,10 +168,8 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	HealCharacter(10.0f);
 
-	if (GEngine) {
+	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), CurrentHealth));
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), CurrentHealth));
-	}
 	// TEST END
  
 }

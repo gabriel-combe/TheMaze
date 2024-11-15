@@ -15,7 +15,6 @@ class THEMAZE_API AHealthPackItem : public AActor, public IInteractable
 
 private:
 	// Scene Component
-	UPROPERTY(EditAnywhere)
 	TObjectPtr<USceneComponent> DefaultSceneRoot;
 
 	// Mesh of the health pack

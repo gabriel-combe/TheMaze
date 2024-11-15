@@ -15,7 +15,6 @@ class THEMAZE_API AKeyItem : public AActor, public IInteractable
 
 private:
 	// Scene Component
-	UPROPERTY(EditAnywhere)
 	TObjectPtr<USceneComponent> DefaultSceneRoot;
 
 	// Mesh component of the key

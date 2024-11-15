@@ -32,8 +32,19 @@ ADoorObject::ADoorObject()
 		DoorRComp->SetStaticMesh(DoorR.Object);
 	}
 
+	DoorTopComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorTop"));
+	DoorTopComp->SetupAttachment(RootComponent);
+	
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorTop(TEXT("/Game/Assets/Door_Top_Wall.Door_Top_Wall"));
+	if (DoorTop.Succeeded()) {
+		DoorTopComp->SetStaticMesh(DoorTop.Object);
+	}
+
+
 	DoorLComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f)); 
 	DoorRComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	DoorTopComp->SetRelativeLocation(FVector(0.0f, 0.0f, 212.5f));
+	DoorTopComp->SetRelativeRotation(FQuat(FRotator(0.0f, 90.0f, 0.0f)));
 
 
 	WidgetDoor = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetDoor"));

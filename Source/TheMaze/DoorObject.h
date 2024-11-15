@@ -17,16 +17,19 @@ class THEMAZE_API ADoorObject : public AActor, public IInteractable
 
 private:
 	// Scene Component
-	UPROPERTY(EditAnywhere)
 	TObjectPtr<USceneComponent> DefaultSceneRoot;
 
 	// Mesh component of the left door
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStaticMeshComponent> DoorLComp;
 
 	// Mesh component of the right door
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStaticMeshComponent> DoorRComp;
+
+	// Mesh component of the top of the door
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> DoorTopComp;
 
 	// Widget component of the door (for text display)
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))

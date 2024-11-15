@@ -30,3 +30,28 @@ struct FTierProperty : public FTableRowBase {
 	float Proba;
 
 };
+
+USTRUCT(BlueprintType)
+struct FNode {
+	GENERATED_BODY()
+
+	// Is the Node a DeadEnd path
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
+	bool isDeadEnd;
+
+	// Direction the Node is pointing
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
+	FVector2D LinkDirection;
+
+	FNode(FVector2D Direction)
+	{
+		isDeadEnd = false;
+		LinkDirection = Direction;
+	}
+
+	FNode()
+	{
+		isDeadEnd = false;
+		LinkDirection = FVector2D(0, 0);
+	}
+};

@@ -70,23 +70,21 @@ void AMazeGenerator::NewMazeMap()
 
 	for (int y = 0; y < Height; y++) {
 		MazeMap.Emplace(FNode(FVector2D(0, y), FVector2D(1, 0), true));
-		ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector(0, y * (CellSize + 25.0f), 0.0f), FVector::OneVector));
+		ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector(0, y * CellSize, 0.0f), FVector::OneVector));
 
 		for (int x = 1; x < Width - 1; x++) {
 			MazeMap.Emplace(FNode(FVector2D(x, y), FVector2D(1, 0)));
 			MazeMap[x + y * Width].SetLinkNbOthers(1);
 
-			ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector(x * (CellSize + 25.0f), y * (CellSize + 25.0f), 0.0f), FVector::OneVector));
+			ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector(x * CellSize, y * CellSize, 0.0f), FVector::OneVector));
 		}
 
 		MazeMap.Emplace(FNode(FVector2D(Width-1, y), FVector2D(0, 1)));
-		ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector((Width - 1) * (CellSize + 25.0f), y * (CellSize + 25.0f), 0.0f), FVector::OneVector));
+		ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector((Width - 1) * CellSize, y * CellSize, 0.0f), FVector::OneVector));
 
 		if (y != 0)
 			MazeMap[Width-1 + y * Width].SetLinkNbOthers(2);
 	}
 
 	MazeMap[(Width - 1) + (Height - 1) * Width].SetDirection(FVector2D(0, 0));
-
-	//ISMFloorComponent->InstanceBodies
 }

@@ -69,4 +69,11 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void NewMazeMap();
 
+	// One step iteration of the maze generation
+	UFUNCTION(BlueprintCallable, Category = "Maze")
+	void MazeGenIteration();
+
+	// Get the index of a neighbour node via direction
+	UFUNCTION(BlueprintCallable, Category = "Maze")
+	int GetNeighbourViaDirection(FVector2D pos, FVector2D dir) const { return (pos.X + dir.X) + (pos.Y + dir.Y) * Width; }
 };

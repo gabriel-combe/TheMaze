@@ -12,6 +12,14 @@ enum class EKeyDoorTier : uint8 {
 	KeyDoor_Rare		UMETA(DisplayName = "Rare"),
 };
 
+UENUM(BlueprintType)
+enum class EDirection : uint8 {
+	NORTH = 0	UMETA(DisplayName = "North"),
+	EAST		UMETA(DisplayName = "East"),
+	SOUTH		UMETA(DisplayName = "South"),
+	WEST		UMETA(DisplayName = "West"),
+};
+
 
 USTRUCT(BlueprintType)
 struct FTierProperty : public FTableRowBase {
@@ -51,12 +59,17 @@ struct FNode {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
 	int LinkNumberFromOthers;
 
+	// List of walls for this node
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
+	TArray<int> WallArray;
+
 	FNode(FVector2D Pos, FVector2D Direction, bool DeadEnd)
 	{
 		isDeadEnd = DeadEnd;
 		Position = Pos;
 		LinkDirection = Direction;
 		LinkNumberFromOthers = 0;
+		WallArray.Init(-1, 4);
 	}
 
 	FNode(FVector2D Pos, FVector2D Direction)
@@ -65,6 +78,7 @@ struct FNode {
 		Position = Pos;
 		LinkDirection = Direction;
 		LinkNumberFromOthers = 0;
+		WallArray.Init(-1, 4);
 	}
 
 	FNode()
@@ -73,6 +87,7 @@ struct FNode {
 		Position = FVector2D(0, 0);
 		LinkDirection = FVector2D(0, 0);
 		LinkNumberFromOthers = 0;
+		WallArray.Init(-1, 4);
 	}
 
 	void SetDirection(FVector2D NewDirection)

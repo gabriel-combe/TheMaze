@@ -21,8 +21,8 @@ AMazeGenerator::AMazeGenerator()
 	ISMWallComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM Walls"));
 	ISMWallComponent->SetupAttachment(ISMFloorComponent);
 
-	Width = 25;
-	Height = 25;
+	Width = 5;
+	Height = 5;
 
 	// Setup the possible direction
 	PossibleDirection.Emplace(FVector2D(-1, 0));
@@ -58,6 +58,7 @@ void AMazeGenerator::Tick(float DeltaTime)
 
 }
 
+// TODO Might need to refactor this function (my eyes are bleeding)
 // Generate a new Maze map (default map)
 void AMazeGenerator::NewMazeMap()
 {
@@ -68,23 +69,122 @@ void AMazeGenerator::NewMazeMap()
 	ISMFloorComponent->ClearInstances();
 	ISMWallComponent->ClearInstances();
 
+	// Generate the outer walls of the maze
+	/*for (int y = 0; y < Height; y++)
+		ISMWallComponent->AddInstance(FTransform(FQuat::Identity, FVector(100.0f + (Width-1) * CellSize, y * CellSize, 0.0f), FVector::OneVector));
+
+	for (int x = Width-1; x >= 0; x--)
+		ISMWallComponent->AddInstance(FTransform(FRotator(0.0f, 90.0f, 0.0f), FVector(x * CellSize, 100.0f + (Height-1) * CellSize, 0.0f), FVector::OneVector));
+
+	for (int y = Height-1; y >= 0; y--)
+		ISMWallComponent->AddInstance(FTransform(FQuat::Identity, FVector(-100.0f, y * CellSize, 0.0f), FVector::OneVector));
+
+	for (int x = 0; x < Width; x++)
+		ISMWallComponent->AddInstance(FTransform(FRotator(0.0f, 90.0f, 0.0f), FVector(x * CellSize, -100.0f, 0.0f), FVector::OneVector));*/
+
+	int CurrentWallIndex = -1;
+	int WallIndexOffset = 2 * (Width + Height);
+
+	// Generate the floor and some walls of the maze
 	for (int y = 0; y < Height; y++) {
-		MazeMap.Emplace(FNode(FVector2D(0, y), FVector2D(1, 0), true));
+		FNode CurrentNode = FNode(FVector2D(0, y), FVector2D(1, 0), true);
+		
 		ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector(0, y * CellSize, 0.0f), FVector::OneVector));
-
-		for (int x = 1; x < Width - 1; x++) {
-			MazeMap.Emplace(FNode(FVector2D(x, y), FVector2D(1, 0)));
-			MazeMap[x + y * Width].SetLinkNbOthers(1);
-
-			ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector(x * CellSize, y * CellSize, 0.0f), FVector::OneVector));
+		
+		// North Wall at X start
+		if (y != (Height - 1)) {
+			CurrentWallIndex = ISMWallComponent->AddInstance(FTransform(FRotator(0.0f, 90.0f, 0.0f), FVector(0, 100.0f + y * CellSize, 0.0f), FVector::OneVector));
+			CurrentNode.WallArray[int(EDirection::NORTH)] = CurrentWallIndex;
 		}
 
-		MazeMap.Emplace(FNode(FVector2D(Width-1, y), FVector2D(0, 1)));
+		// South Wall at X start
+		if (y != 0) {
+			CurrentNode.WallArray[int(EDirection::SOUTH)] = 2 * ((y - 1) * Width);
+			if (y == (Height - 1))
+				CurrentNode.WallArray[int(EDirection::SOUTH)]--;
+		}
+			
+		// West Wall at X start
+		CurrentWallIndex = ISMWallComponent->AddInstance(FTransform(FQuat::Identity, FVector(100.0f, y * CellSize, 0.0f), FVector::OneVector));
+		CurrentNode.WallArray[int(EDirection::WEST)] = CurrentWallIndex;
+
+		// Add the node in the maze map
+		MazeMap.Emplace(CurrentNode);
+
+		// Set initial wall display for the path (Hide or not)
+		ISMWallComponent->UpdateInstanceTransform(MazeMap[(Width - 1) + y * Width].WallArray[int(EDirection::NORTH)], FTransform(FQuat::Identity, FVector(0, 0, -300), FVector::OneVector));
+		//ISMWallComponent->InstanceBodies[MazeMap[y * Width].WallArray[int(EDirection::WEST)]]->UpdateBodyScale(FVector(0, 0, 0));
+
+		for (int x = 1; x < Width - 1; x++) {
+			CurrentNode = FNode(FVector2D(x, y), FVector2D(1, 0));
+
+			ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector(x * CellSize, y * CellSize, 0.0f), FVector::OneVector));
+			
+			// East Wall
+			CurrentNode.WallArray[int(EDirection::EAST)] = CurrentWallIndex;
+
+			// North Wall
+			if (y != (Height - 1)) {
+				CurrentWallIndex = ISMWallComponent->AddInstance(FTransform(FRotator(0.0f, 90.0f, 0.0f), FVector(x * CellSize, 100.0f + y * CellSize, 0.0f), FVector::OneVector));
+				CurrentNode.WallArray[int(EDirection::NORTH)] = CurrentWallIndex;
+			}
+
+			// South Wall
+			if (y != 0) {
+				CurrentNode.WallArray[int(EDirection::SOUTH)] = 2 * (x + (y - 1) * Width);
+				if (y == (Height - 1))
+					CurrentNode.WallArray[int(EDirection::SOUTH)]--;
+			}
+			
+			// West Wall
+			CurrentWallIndex = ISMWallComponent->AddInstance(FTransform(FQuat::Identity, FVector(100.0f + x * CellSize, y * CellSize, 0.0f), FVector::OneVector));
+			CurrentNode.WallArray[int(EDirection::WEST)] = CurrentWallIndex;
+
+			MazeMap.Emplace(CurrentNode);
+			MazeMap[x + y * Width].SetLinkNbOthers(1);
+
+			// Set initial wall display for the path (Hide or not)
+			ISMWallComponent->UpdateInstanceTransform(MazeMap[(Width - 1) + y * Width].WallArray[int(EDirection::NORTH)], FTransform(FQuat::Identity, FVector(0, 0, -300), FVector::OneVector));
+			//ISMWallComponent->InstanceBodies[MazeMap[x + y * Width].WallArray[int(EDirection::WEST)]]->UpdateBodyScale(FVector(0, 0, 0));
+		}
+
+		CurrentNode = FNode(FVector2D(Width - 1, y), FVector2D(0, 1));
 		ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector((Width - 1) * CellSize, y * CellSize, 0.0f), FVector::OneVector));
 
-		if (y != 0)
+		// East Wall at X end
+		CurrentNode.WallArray[int(EDirection::EAST)] = CurrentWallIndex;
+
+		// North Wall at X end
+		if (y != (Height - 1)) {
+			CurrentWallIndex = ISMWallComponent->AddInstance(FTransform(FRotator(0.0f, 90.0f, 0.0f), FVector((Width - 1) * CellSize, 100.0f + y * CellSize, 0.0f), FVector::OneVector));
+			CurrentNode.WallArray[int(EDirection::NORTH)] = CurrentWallIndex;
+		}
+
+		// South Wall
+		if (y != 0) {
+			CurrentNode.WallArray[int(EDirection::SOUTH)] = 2 * ((Width - 1) + (y - 1) * Width);
+			if (y == (Height - 1))
+				CurrentNode.WallArray[int(EDirection::SOUTH)]--;
+		}
+
+		MazeMap.Emplace(CurrentNode);
+		if (y != 0) {
 			MazeMap[Width-1 + y * Width].SetLinkNbOthers(2);
+
+			// Set initial wall display for the path (Hide or not)
+			if (y != (Height - 1))
+				ISMWallComponent->UpdateInstanceTransform(MazeMap[(Width - 1) + y * Width].WallArray[int(EDirection::NORTH)], FTransform(FQuat::Identity, FVector(0, 0, -300), FVector::OneVector));
+				//ISMWallComponent->InstanceBodies[MazeMap[(Width - 1) + y * Width].WallArray[int(EDirection::NORTH)]]->UpdateBodyScale(FVector(0, 0, 0));
+		}
 	}
 
 	MazeMap[(Width - 1) + (Height - 1) * Width].SetDirection(FVector2D(0, 0));
+
+	
+}
+
+// One step iteration of the maze generation
+void AMazeGenerator::MazeGenIteration()
+{
+
 }

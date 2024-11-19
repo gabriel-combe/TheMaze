@@ -1,26 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DoorObject.h"
+#include "KeyItem.h"
 #include "Engine/DataTable.h"
-#include "MazeData.generated.h"
-
-
-UENUM(BlueprintType)
-enum class EKeyDoorTier : uint8 {
-	KeyDoor_Common		UMETA(DisplayName = "Common"),
-	KeyDoor_Uncommon	UMETA(DisplayName = "Uncommon"),
-	KeyDoor_Rare		UMETA(DisplayName = "Rare"),
-};
-
-UENUM(BlueprintType)
-enum class EDirection : uint8 {
-	NORTH = 0	UMETA(DisplayName = "North"),
-	EAST		UMETA(DisplayName = "East"),
-	SOUTH		UMETA(DisplayName = "South"),
-	WEST		UMETA(DisplayName = "West"),
-	UNDEF		UMETA(DisplayName = "Undefined"),
-};
-
+#include "MazeDataStruct.generated.h"
 
 USTRUCT(BlueprintType)
 struct FTierProperty : public FTableRowBase {
@@ -64,6 +48,14 @@ struct FNode {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
 	TArray<int> WallArray;
 
+	// Door associated to this node if it is a dead end
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
+	TObjectPtr<ADoorObject> Door = nullptr;
+
+	// Key associated to this node if it is a dead end
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
+	TObjectPtr<AKeyItem> Key = nullptr;
+
 	FNode(FVector2D Pos, FVector2D Direction, bool DeadEnd)
 	{
 		isDeadEnd = DeadEnd;
@@ -91,21 +83,29 @@ struct FNode {
 		WallArray.Init(-1, 4);
 	}
 
+	bool operator==(const FNode& other) const{
+		return Position == other.Position;
+	}
+
 	void SetDirection(FVector2D NewDirection)
 	{
 		LinkDirection = NewDirection;
+
+		CheckIsDeadEnd();
 	}
 
 	void SetLinkNbOthers(int count)
 	{
 		LinkNumberFromOthers = count;
+
+		CheckIsDeadEnd();
 	}
 
 	void AddLinkNbOthers()
 	{
 		LinkNumberFromOthers++;
 
-		isDeadEnd = false;
+		CheckIsDeadEnd();
 	}
 
 	void RemoveLinkNbOthers()
@@ -114,7 +114,16 @@ struct FNode {
 
 		LinkNumberFromOthers--;
 
-		if (LinkNumberFromOthers == 0)
-			isDeadEnd = true;
+		CheckIsDeadEnd();
+	}
+
+	void CheckIsDeadEnd()
+	{
+		isDeadEnd = (LinkNumberFromOthers == 0 && LinkDirection != FVector2D::ZeroVector) || (LinkNumberFromOthers == 1 && LinkDirection == FVector2D::ZeroVector);
+	}
+
+	void UpdateTransformItem()
+	{
+
 	}
 };

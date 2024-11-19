@@ -13,7 +13,7 @@
 
 #include "Interactable.h"
 #include "HUDInterface.h"
-#include "MazeData.h"
+#include "MazeDataEnum.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);

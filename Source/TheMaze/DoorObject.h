@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Interactable.h"
-#include "MazeData.h"
+#include "MazeDataEnum.h"
 #include "DoorInfoWidget.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Actor.h"

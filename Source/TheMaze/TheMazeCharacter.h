@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MazeData.h"
+#include "MazeDataEnum.h"
 #include "MazeHUD.h"
 #include "MazeGameInstance.h"
 #include "Perception/AISense_Sight.h"

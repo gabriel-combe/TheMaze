@@ -22,8 +22,8 @@ public:
 	TArray<int> Size;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
-	int NBEnemies = 4;
+	int NBEnemies = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
-	int ChronoTime = 60;
+	int ChronoTime = 180;
 };

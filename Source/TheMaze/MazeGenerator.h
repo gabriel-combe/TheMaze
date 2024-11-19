@@ -15,6 +15,9 @@ class THEMAZE_API AMazeGenerator : public AActor
 	GENERATED_BODY()
 
 private:
+	// Test Sphere
+	UStaticMeshComponent* SphereMesh;
+	
 	// Position of the origin point
 	FVector2D Origin;
 
@@ -29,6 +32,27 @@ private:
 
 	// Scene Component
 	TObjectPtr<USceneComponent> DefaultSceneRoot;
+
+	// Generate Outer walls function
+	void GenerateOuterWalls();
+
+	// Generate Walls of a Node
+	void GenerateNodeWalls(FNode& CurrentNode, int CurrentWallIndex, int WallIndexOffset);
+
+	// Move Wall on Z
+	void MoveWallByDir(FNode& Node, EDirection dir, float ZMove);
+
+	// Hide Wall function
+	void HideWallByDir(FNode& Node, EDirection dir);
+
+	// Show Wall function
+	void ShowWallByDir(FNode& Node, EDirection dir);
+
+	// Check if pos is in bound
+	bool IsPosInBound(FVector2D pos);
+
+	// Direction to EDirection enum
+	EDirection VecToEDir(FVector2D direction);
 	
 protected:
 	// Called when the game starts or when spawned
@@ -55,7 +79,7 @@ protected:
 	float CellSize = 200;
 
 	// 1D array representing the 2D Maze (contain nodes)
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze")
 	TArray<FNode> MazeMap;
 
 public:	
@@ -70,8 +94,11 @@ public:
 	void NewMazeMap();
 
 	// One step iteration of the maze generation
-	UFUNCTION(BlueprintCallable, Category = "Maze")
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void MazeGenIteration();
+
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	void MazeGenMultiStepRandomize();
 
 	// Get the index of a neighbour node via direction
 	UFUNCTION(BlueprintCallable, Category = "Maze")

@@ -6,5 +6,5 @@
 UMazeGameInstance::UMazeGameInstance()
 {
 	// Set length and default value of Size
-	Size.Init(100, 2);
+	Size.Init(10, 2);
 }

@@ -18,6 +18,7 @@ enum class EDirection : uint8 {
 	EAST		UMETA(DisplayName = "East"),
 	SOUTH		UMETA(DisplayName = "South"),
 	WEST		UMETA(DisplayName = "West"),
+	UNDEF		UMETA(DisplayName = "Undefined"),
 };
 
 
@@ -103,10 +104,17 @@ struct FNode {
 	void AddLinkNbOthers()
 	{
 		LinkNumberFromOthers++;
+
+		isDeadEnd = false;
 	}
 
 	void RemoveLinkNbOthers()
 	{
+		if (LinkNumberFromOthers == 0) return;
+
 		LinkNumberFromOthers--;
+
+		if (LinkNumberFromOthers == 0)
+			isDeadEnd = true;
 	}
 };

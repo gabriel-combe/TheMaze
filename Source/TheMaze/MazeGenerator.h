@@ -3,8 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MazeData.h"
+#include "MazeDataEnum.h"
+#include "MazeDataStruct.h"
 #include "MazeGameInstance.h"
+#include "MonsterAI.h"
+#include "TriggerSpikes.h"
+#include "DoorObject.h"
+#include "KeyItem.h"
+#include "HealthPackItem.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "MazeGenerator.generated.h"
@@ -32,6 +38,12 @@ private:
 
 	// Scene Component
 	TObjectPtr<USceneComponent> DefaultSceneRoot;
+
+	// List of MonsterAI
+	TArray<AMonsterAI*> ListMonsters;
+
+	// List of Spikes
+	TArray<ATriggerSpikes*> ListTriggerSpikes;
 
 	// Generate Outer walls function
 	void GenerateOuterWalls();
@@ -66,6 +78,22 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Mesh")
 	TObjectPtr<UInstancedStaticMeshComponent> ISMWallComponent;
 
+	// AI Monster blueprint
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
+	TSubclassOf<AMonsterAI> MonsterAIBP;
+
+	// Trigger Spikes blueprint
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
+	TSubclassOf<ATriggerSpikes> TriggerSpikesBP;
+
+	// Door blueprint
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
+	TSubclassOf<ADoorObject> DoorBP;
+
+	// Key blueprint
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
+	TSubclassOf<AKeyItem> KeyBP;
+
 	// Width of the Maze
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
 	int Width;
@@ -74,6 +102,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
 	int Height;
 
+	// Number of Monster in the Maze
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
+	int NumberOfMonster;
+
+	// List of the total number of key for each Tier
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
+	TArray<int> ListNumberKeyByTier;
+
+	// Probability that a Trigger Spike spawn in the Maze
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
+	float ProbaTriggerSpikes;
+
 	// Size of each cell of the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings", meta = (ClampMin = "20.0", UIMin = "20.0"))
 	float CellSize = 200;
@@ -81,6 +121,14 @@ protected:
 	// 1D array representing the 2D Maze (contain nodes)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze")
 	TArray<FNode> MazeMap;
+
+	// List of Unpopulated Dead End Node
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze")
+	TArray<FNode> ListUnpopulatedDeadEnd;
+
+	// List of Populated Dead End Node
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze")
+	TArray<FNode> ListPopulatedDeadEnd;
 
 public:	
 	// Sets default values for this actor's properties
@@ -97,10 +145,35 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void MazeGenIteration();
 
+	// Randomize the maze
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void MazeGenMultiStepRandomize();
 
 	// Get the index of a neighbour node via direction
 	UFUNCTION(BlueprintCallable, Category = "Maze")
 	int GetNeighbourViaDirection(FVector2D pos, FVector2D dir) const { return (pos.X + dir.X) + (pos.Y + dir.Y) * Width; }
+
+	// Spawn the Monster AI in the maze
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	void MonsterAISpawn();
+
+	// Clear all the Monster AI in the maze
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	void MonsterAIClear();
+
+	// Spawn the Monster AI in the maze
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	void TriggerSpikesSpawn();
+
+	// Clear all the Monster AI in the maze
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	void TriggerSpikesClear();
+
+	// Spawn the Monster AI in the maze
+	// UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	// void KeySpawn(EKeyDoorTier Tier);
+
+	// Clear all the Monster AI in the maze
+	// UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	// void KeyClear();
 };

@@ -21,16 +21,19 @@ AMazeGenerator::AMazeGenerator()
 	ISMWallComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM Walls"));
 	ISMWallComponent->SetupAttachment(ISMFloorComponent);
 
+	// Sphere Test setup
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
 	SphereMesh->SetupAttachment(RootComponent);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
 
-	Width = 5;
-	Height = 5;
+	Width = 10;
+	Height = 10;
+	NumberOfMonster = 2;
+	ProbaTriggerSpikes = 0.2;
 
-	Origin = FVector2D(Width - 1, Height - 1);
+	ListNumberKeyByTier.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
 
 	// Setup the possible direction
 	PossibleDirection.Emplace(FVector2D(0, 1));
@@ -47,13 +50,14 @@ void AMazeGenerator::BeginPlay()
 	// Get the maze game instance
 	MazeGI = CastChecked<UMazeGameInstance>(GetGameInstance());
 
-	// Set the default Width and Height of the maze from the game instance
+	// Set the default parameters of the maze from the game instance
 	Width = MazeGI->Size[0];
 	Height = MazeGI->Size[1];
-
-	Origin = FVector2D(Width - 1, Height - 1);
+	NumberOfMonster = MazeGI->NBEnemies;
 
 	NewMazeMap();
+
+	MazeGenMultiStepRandomize();
 
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%d	%d"), PossibleDirection[0].X, PossibleDirection[0].Y));
@@ -128,9 +132,9 @@ void AMazeGenerator::MoveWallByDir(FNode& Node, EDirection dir, float ZMove)
 		factor.X = 1;
 		break;
 	case EDirection::UNDEF:
-		break;
+		return;
 	default:
-		break;
+		return;
 	}
 
 	ISMWallComponent->UpdateInstanceTransform(Node.WallArray[int(dir)], FTransform(FRotator(0, FMath::Abs(factor.Y) * 90, 0), FVector(factor.X * 100.0f + Node.Position.X * CellSize, factor.Y * 100.0f + Node.Position.Y * CellSize, ZMove), FVector::OneVector));
@@ -193,6 +197,7 @@ void AMazeGenerator::NewMazeMap()
 	// Generate the floor and some walls of the maze
 	for (int y = 0; y < Height; y++) {
 		FNode CurrentNode = FNode(FVector2D(0, y), FVector2D(1, 0), true);
+		ListUnpopulatedDeadEnd.Emplace(CurrentNode);
 		
 		ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, FVector(0, y * CellSize, 0.0f), FVector::OneVector));
 
@@ -254,22 +259,100 @@ void AMazeGenerator::MazeGenIteration()
 	// Recompute if the previous pointing node is a dead end
 	FVector2D PrevDir = MazeMap[NextOrigin.X + NextOrigin.Y * Width].LinkDirection;
 	FVector2D PrevNodePos = NextOrigin + PrevDir;
+	FNode* TargetNextNode = &MazeMap[PrevNodePos.X + PrevNodePos.Y * Width];
 	MazeMap[PrevNodePos.X + PrevNodePos.Y * Width].RemoveLinkNbOthers();
 
+	// NextOrigin node and Origin Node
+	FNode* NextNode = &MazeMap[NextOrigin.X + NextOrigin.Y * Width];
+	FNode* OriginNode = &MazeMap[Origin.X + Origin.Y * Width];
+	bool OriginWasDeadEnd = OriginNode->isDeadEnd;
+	bool NextOriginWasDeadEnd = NextNode->isDeadEnd;
+
 	// Show wall
-	ShowWallByDir(MazeMap[NextOrigin.X + NextOrigin.Y * Width], VecToEDir(PrevDir));
+	ShowWallByDir(*NextNode, VecToEDir(PrevDir));
 
 	// Set the origin node direction to this direction
-	MazeMap[Origin.X + Origin.Y * Width].SetDirection(direction);
+	OriginNode->SetDirection(direction);
 
 	// Hide wall
-	HideWallByDir(MazeMap[Origin.X + Origin.Y * Width], VecToEDir(direction));
+	HideWallByDir(*OriginNode, VecToEDir(direction));
 	
 
 	// Reset the direction of the new origin
 	Origin = NextOrigin;
-	MazeMap[Origin.X + Origin.Y * Width].SetDirection(FVector2D(0, 0));
-	MazeMap[Origin.X + Origin.Y * Width].AddLinkNbOthers();
+	NextNode->SetDirection(FVector2D(0, 0));
+	NextNode->AddLinkNbOthers();
+
+	if (OriginNode->isDeadEnd)
+		ListUnpopulatedDeadEnd.AddUnique(*OriginNode);
+
+	if (NextNode->isDeadEnd)
+		ListUnpopulatedDeadEnd.AddUnique(*NextNode);
+
+	if (TargetNextNode->isDeadEnd)
+		ListUnpopulatedDeadEnd.AddUnique(*TargetNextNode);
+
+	// Rearrange Keys and Doors in the dead ends
+	if (!NextNode->Key.IsNull() && NextOriginWasDeadEnd && NextNode->isDeadEnd) {
+		if (TargetNextNode->isDeadEnd && TargetNextNode->Key.IsNull()) {
+			TargetNextNode->Door = NextNode->Door;
+			TargetNextNode->Key = NextNode->Key;
+
+			ListPopulatedDeadEnd.Emplace(*TargetNextNode);
+
+			TargetNextNode->UpdateTransformItem();
+		}
+		else {
+			FNode RandNode = ListUnpopulatedDeadEnd[FMath::RandRange(0, ListUnpopulatedDeadEnd.Num() - 1)];
+			ListUnpopulatedDeadEnd.Remove(RandNode);
+
+			FNode* PtrRandNode = &MazeMap[RandNode.Position.X + RandNode.Position.Y * Width];
+
+			PtrRandNode->Door = NextNode->Door;
+			PtrRandNode->Key = NextNode->Key;
+
+			ListPopulatedDeadEnd.Emplace(*PtrRandNode);
+
+			PtrRandNode->UpdateTransformItem();
+		}
+
+		ListPopulatedDeadEnd.Remove(*NextNode);
+		ListUnpopulatedDeadEnd.Emplace(*NextNode);
+	}
+
+	if (!OriginNode->Key.IsNull() && OriginWasDeadEnd && !OriginNode->isDeadEnd) {
+		if (NextNode->isDeadEnd && NextNode->Key.IsNull()) {
+			NextNode->Door = OriginNode->Door;
+			NextNode->Key = OriginNode->Key;
+
+			ListPopulatedDeadEnd.Emplace(*NextNode);
+
+			NextNode->UpdateTransformItem();
+		}
+		else if (TargetNextNode->isDeadEnd && TargetNextNode->Key.IsNull()) {
+			TargetNextNode->Door = OriginNode->Door;
+			TargetNextNode->Key = OriginNode->Key;
+
+			ListPopulatedDeadEnd.Emplace(*TargetNextNode);
+
+			TargetNextNode->UpdateTransformItem();
+		}
+		else {
+			FNode RandNode = ListUnpopulatedDeadEnd[FMath::RandRange(0, ListUnpopulatedDeadEnd.Num() - 1)];
+			ListUnpopulatedDeadEnd.Remove(RandNode);
+
+			FNode* PtrRandNode = &MazeMap[RandNode.Position.X + RandNode.Position.Y * Width];
+
+			RandNode.Door = OriginNode->Door;
+			RandNode.Key = OriginNode->Key;
+
+			ListPopulatedDeadEnd.Emplace(*PtrRandNode);
+
+			RandNode.UpdateTransformItem();
+		}
+
+		ListPopulatedDeadEnd.Remove(*OriginNode);
+	}
 
 	// Test Sphere Move
 	SphereMesh->SetRelativeLocation(FVector(Origin.X * CellSize, Origin.Y * CellSize, 0));
@@ -279,4 +362,58 @@ void AMazeGenerator::MazeGenMultiStepRandomize()
 {
 	for (int i = 0; i < Width * Height * 10; i++)
 		MazeGenIteration();
+}
+
+void AMazeGenerator::MonsterAISpawn()
+{
+	MonsterAIClear();
+
+	for (int i = 0; i < NumberOfMonster; i++) {
+		bool ValidPos = false;
+		FNode Node;
+
+		while (!ValidPos) {
+			Node = MazeMap[FMath::RandRange(0, MazeMap.Num() - 1)];
+
+			ValidPos = !Node.isDeadEnd;
+		}
+
+		ListMonsters.Emplace(GetWorld()->SpawnActor<AMonsterAI>(MonsterAIBP, FTransform(GetActorRotation(), GetActorLocation() + FVector(Node.Position.X * CellSize, Node.Position.Y * CellSize, 90), FVector::OneVector)));
+	}
+}
+
+void AMazeGenerator::MonsterAIClear()
+{
+	if (ListMonsters.IsEmpty()) return;
+
+	for (AMonsterAI* monster : ListMonsters) {
+		monster->Destroy();
+	}
+
+	ListMonsters.Empty();
+}
+
+void AMazeGenerator::TriggerSpikesSpawn()
+{
+	TriggerSpikesClear();
+
+	for (int i = 0; i < MazeMap.Num(); i++)
+	{
+		FNode Node = MazeMap[i];
+
+		if (Node.isDeadEnd || FMath::SRand() > ProbaTriggerSpikes) continue;
+
+		ListTriggerSpikes.Emplace(GetWorld()->SpawnActor<ATriggerSpikes>(TriggerSpikesBP, FTransform(GetActorRotation(), GetActorLocation() + FVector(Node.Position.X * CellSize, Node.Position.Y * CellSize, 40), FVector::OneVector)));
+	}
+}
+
+void AMazeGenerator::TriggerSpikesClear()
+{
+	if (ListTriggerSpikes.IsEmpty()) return;
+
+	for (ATriggerSpikes* spikes : ListTriggerSpikes) {
+		spikes->Destroy();
+	}
+
+	ListTriggerSpikes.Empty();
 }

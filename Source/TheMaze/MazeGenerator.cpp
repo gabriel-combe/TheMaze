@@ -33,7 +33,10 @@ AMazeGenerator::AMazeGenerator()
 	NumberOfMonster = 2;
 	ProbaTriggerSpikes = 0.2;
 
+	MaxDeadEnd = int(Width * Height * 0.2f);
+
 	ListNumberKeyByTier.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
+	ListNumberKeyByTier[2] = 3;
 
 	// Setup the possible direction
 	PossibleDirection.Emplace(FVector2D(0, 1));
@@ -292,11 +295,11 @@ void AMazeGenerator::MazeGenIteration()
 	if (TargetNextNode->isDeadEnd)
 		ListUnpopulatedDeadEnd.AddUnique(*TargetNextNode);
 
-	// Rearrange Keys and Doors in the dead ends
-	if (!NextNode->Key.IsNull() && NextOriginWasDeadEnd && NextNode->isDeadEnd) {
-		if (TargetNextNode->isDeadEnd && TargetNextNode->Key.IsNull()) {
+	// Rearrange Items and Doors in the dead ends
+	if (!NextNode->Item.IsNull() && NextOriginWasDeadEnd && NextNode->isDeadEnd) {
+		if (TargetNextNode->isDeadEnd && TargetNextNode->Item.IsNull()) {
 			TargetNextNode->Door = NextNode->Door;
-			TargetNextNode->Key = NextNode->Key;
+			TargetNextNode->Item = NextNode->Item;
 
 			ListPopulatedDeadEnd.Emplace(*TargetNextNode);
 
@@ -309,7 +312,7 @@ void AMazeGenerator::MazeGenIteration()
 			FNode* PtrRandNode = &MazeMap[RandNode.Position.X + RandNode.Position.Y * Width];
 
 			PtrRandNode->Door = NextNode->Door;
-			PtrRandNode->Key = NextNode->Key;
+			PtrRandNode->Item = NextNode->Item;
 
 			ListPopulatedDeadEnd.Emplace(*PtrRandNode);
 
@@ -320,18 +323,18 @@ void AMazeGenerator::MazeGenIteration()
 		ListUnpopulatedDeadEnd.Emplace(*NextNode);
 	}
 
-	if (!OriginNode->Key.IsNull() && OriginWasDeadEnd && !OriginNode->isDeadEnd) {
-		if (NextNode->isDeadEnd && NextNode->Key.IsNull()) {
+	if (!OriginNode->Item.IsNull() && OriginWasDeadEnd && !OriginNode->isDeadEnd) {
+		if (NextNode->isDeadEnd && NextNode->Item.IsNull()) {
 			NextNode->Door = OriginNode->Door;
-			NextNode->Key = OriginNode->Key;
+			NextNode->Item = OriginNode->Item;
 
 			ListPopulatedDeadEnd.Emplace(*NextNode);
 
 			NextNode->UpdateTransformItem();
 		}
-		else if (TargetNextNode->isDeadEnd && TargetNextNode->Key.IsNull()) {
+		else if (TargetNextNode->isDeadEnd && TargetNextNode->Item.IsNull()) {
 			TargetNextNode->Door = OriginNode->Door;
-			TargetNextNode->Key = OriginNode->Key;
+			TargetNextNode->Item = OriginNode->Item;
 
 			ListPopulatedDeadEnd.Emplace(*TargetNextNode);
 
@@ -344,7 +347,7 @@ void AMazeGenerator::MazeGenIteration()
 			FNode* PtrRandNode = &MazeMap[RandNode.Position.X + RandNode.Position.Y * Width];
 
 			RandNode.Door = OriginNode->Door;
-			RandNode.Key = OriginNode->Key;
+			RandNode.Item = OriginNode->Item;
 
 			ListPopulatedDeadEnd.Emplace(*PtrRandNode);
 
@@ -416,4 +419,43 @@ void AMazeGenerator::TriggerSpikesClear()
 	}
 
 	ListTriggerSpikes.Empty();
+}
+
+// test gen key 
+void AMazeGenerator::SpawnKeyDoor()
+{
+	for (int i = 0; i < ListNumberKeyByTier[int(EKeyDoorTier::KeyDoor_Rare)]; i++) {
+		KeySpawn(EKeyDoorTier::KeyDoor_Rare);
+	}
+}
+
+// Spawn the Monster AI in the maze
+void AMazeGenerator::KeySpawn(EKeyDoorTier Tier)
+{
+	FNode RandNode = ListUnpopulatedDeadEnd[FMath::RandRange(0, ListUnpopulatedDeadEnd.Num() - 1)];
+	ListUnpopulatedDeadEnd.Remove(RandNode);
+
+	FNode* PtrRandNode = &MazeMap[RandNode.Position.X + RandNode.Position.Y * Width];
+
+	AKeyItem* key = GetWorld()->SpawnActor<AKeyItem>(KeyBP);
+	key->KeyTier = Tier;
+	RandNode.Item = key;
+
+	switch (Tier)
+	{
+	case EKeyDoorTier::KeyDoor_Uncommon:
+		ADoorObject* door = GetWorld()->SpawnActor<ADoorObject>(DoorBP);
+		door->DoorTier = EKeyDoorTier::KeyDoor_Common;
+		RandNode.Door = door;
+		break;
+	case EKeyDoorTier::KeyDoor_Rare:
+		ADoorObject* door = GetWorld()->SpawnActor<ADoorObject>(DoorBP);
+		door->DoorTier = EKeyDoorTier::KeyDoor_Uncommon;
+		RandNode.Door = door;
+		break;
+	default:
+		break;
+	}
+
+	ListPopulatedDeadEnd.Emplace(*PtrRandNode);
 }

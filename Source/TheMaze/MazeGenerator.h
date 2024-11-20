@@ -23,6 +23,9 @@ class THEMAZE_API AMazeGenerator : public AActor
 private:
 	// Test Sphere
 	UStaticMeshComponent* SphereMesh;
+
+	// Max number of dead end for keys and doors
+	int MaxDeadEnd;
 	
 	// Position of the origin point
 	FVector2D Origin;
@@ -93,6 +96,10 @@ protected:
 	// Key blueprint
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
 	TSubclassOf<AKeyItem> KeyBP;
+
+	// Health Pack blueprint
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
+	TSubclassOf<AHealthPackItem> HealthPackBP;
 
 	// Width of the Maze
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
@@ -169,9 +176,13 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void TriggerSpikesClear();
 
+	// test gen key 
+	UFUNCTION(CallInEditor, Category = "Maze")
+	void SpawnKeyDoor();
+
 	// Spawn the Monster AI in the maze
-	// UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
-	// void KeySpawn(EKeyDoorTier Tier);
+	UFUNCTION(BlueprintCallable, Category = "Maze")
+	void KeySpawn(EKeyDoorTier Tier);
 
 	// Clear all the Monster AI in the maze
 	// UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing

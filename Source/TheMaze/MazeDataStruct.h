@@ -52,9 +52,9 @@ struct FNode {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
 	TObjectPtr<ADoorObject> Door = nullptr;
 
-	// Key associated to this node if it is a dead end
+	// Item associated to this node if it is a dead end
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
-	TObjectPtr<AKeyItem> Key = nullptr;
+	TObjectPtr<AActor> Item = nullptr;
 
 	FNode(FVector2D Pos, FVector2D Direction, bool DeadEnd)
 	{

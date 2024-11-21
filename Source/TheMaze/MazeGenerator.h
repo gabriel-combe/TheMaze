@@ -21,7 +21,7 @@ class THEMAZE_API AMazeGenerator : public AActor
 	GENERATED_BODY()
 
 private:
-	// Test Sphere
+	// Test
 	UStaticMeshComponent* SphereMesh;
 
 	// Max number of dead end for keys and doors
@@ -48,6 +48,9 @@ private:
 	// List of Spikes
 	TArray<ATriggerSpikes*> ListTriggerSpikes;
 
+	// List of Objects
+	TArray<AActor*> ListObjects;
+
 	// Generate Outer walls function
 	void GenerateOuterWalls();
 
@@ -68,10 +71,20 @@ private:
 
 	// Direction to EDirection enum
 	EDirection VecToEDir(FVector2D direction);
+
+	// Find the direction of the open wall for dead end node
+	FVector2D FindDirDeadEnd(FNode* DeadEnd);
+
+	// Update the node for dead end cases
+	void UpdateNodeForDeadEnd(FNode* Node);
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// TEST
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Mesh")
+	UInstancedStaticMeshComponent* CubeInstance;
 
 	// Instanced static mesh component for the floors
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Mesh")
@@ -180,9 +193,17 @@ public:
 	UFUNCTION(CallInEditor, Category = "Maze")
 	void SpawnKeyDoor();
 
+	// test clear objects 
+	UFUNCTION(CallInEditor, Category = "Maze")
+	void ClearObjects();
+
 	// Spawn the Monster AI in the maze
 	UFUNCTION(BlueprintCallable, Category = "Maze")
 	void KeySpawn(EKeyDoorTier Tier);
+
+	// Display Dead End
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze")
+	void DisplayDeadEnd();
 
 	// Clear all the Monster AI in the maze
 	// UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing

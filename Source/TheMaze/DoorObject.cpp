@@ -103,7 +103,7 @@ void ADoorObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedE
 
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(ADoorObject, DoorTier))
 	{
-		//UpdateDoorText();
+		UpdateDoorText();
 	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -122,6 +122,8 @@ void ADoorObject::Interact_Implementation(ATheMazeCharacter* player)
 	{
 		Open = true;
 		WidgetDoor->SetVisibility(false);
+		DoorLComp->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+		DoorRComp->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 	}
 
 	if (GEngine)
@@ -132,12 +134,22 @@ void ADoorObject::Interact_Implementation(ATheMazeCharacter* player)
 void ADoorObject::SetTier(EKeyDoorTier doorTier)
 {
 	DoorTier = doorTier;
+	UpdateDoorText();
+}
+
+// Set the required key number
+void ADoorObject::SetRequireKey(int NbKey)
+{
+	RequiredKey = NbKey;
+	UpdateDoorText();
 }
 
 // Update the text of the door
 void ADoorObject::UpdateDoorText()
 {
-	if (!DoorInfo) return;
+	WidgetDoor->RequestRenderUpdate();
+	WidgetDoor->RequestRedraw();
+	/*if (!DoorInfo) return;
 
 	DoorInfo->SetText(FString::FromInt(RequiredKey));
 
@@ -154,5 +166,5 @@ void ADoorObject::UpdateDoorText()
 		break;
 	default:
 		break;
-	}
+	}*/
 }

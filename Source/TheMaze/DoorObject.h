@@ -36,11 +36,11 @@ private:
 	TObjectPtr<UWidgetComponent> WidgetDoor;
 
 	// User Widget Class to use for the door info
-	UPROPERTY(EditAnywhere, Category = "Tier", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UDoorInfoWidget> DoorInfoClass;
+	// UPROPERTY(EditAnywhere, Category = "Tier", meta = (AllowPrivateAccess = "true"))
+	// TSubclassOf<UDoorInfoWidget> DoorInfoClass;
 
 	// User Widget to use for the door info
-	TObjectPtr<UDoorInfoWidget> DoorInfo;
+	// TObjectPtr<UDoorInfoWidget> DoorInfo;
 
 	// Tell if the door is open
 	bool Open;
@@ -71,6 +71,9 @@ public:
 
 	// Set Door tier
 	void SetTier(EKeyDoorTier doorTier);
+
+	// Set the required key number
+	void SetRequireKey(int NbKey);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

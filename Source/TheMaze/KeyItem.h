@@ -33,9 +33,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
 	UStaticMesh* KeyItemRare;
 
-	// Update the key mesh based on the key tier
-	void UpdateKeyMesh();
-
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
@@ -43,6 +40,8 @@ private:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	
 
 public:	
 
@@ -58,6 +57,10 @@ public:
 
 	// Set Key tier
 	void SetTier(EKeyDoorTier keyTier);
+
+	// Update the key mesh based on the key tier
+	UFUNCTION(BlueprintCallable, Category = "Tier")
+	void UpdateKeyMesh();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

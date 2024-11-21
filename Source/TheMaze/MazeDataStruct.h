@@ -122,8 +122,20 @@ struct FNode {
 		isDeadEnd = (LinkNumberFromOthers == 0 && LinkDirection != FVector2D::ZeroVector) || (LinkNumberFromOthers == 1 && LinkDirection == FVector2D::ZeroVector);
 	}
 
-	void UpdateTransformItem()
+	void UpdateTransformItem(FVector2D dir, int CellSize)
 	{
+		int RotFactor = 0;
 
+		if (dir.X == -1)
+			RotFactor = 1;
+		else if (dir.Y == -1)
+			RotFactor = 2;
+		else if (dir.X == 1)
+			RotFactor = 3;
+
+		Item->SetActorRelativeTransform(FTransform(FRotator(0, 90 * RotFactor, 0), FVector(Position.X * CellSize, Position.Y * CellSize, 0), FVector::OneVector));
+
+		if (Door)
+			Door->SetActorRelativeTransform(FTransform(FRotator(0, 90 * RotFactor, 0), FVector(dir.X * (CellSize*0.5f) + Position.X * CellSize, dir.Y * (CellSize * 0.5f) + Position.Y * CellSize, 0), FVector::OneVector));
 	}
 };

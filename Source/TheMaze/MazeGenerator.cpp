@@ -28,8 +28,11 @@ AMazeGenerator::AMazeGenerator()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
 	SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
 
-	Width = 10;
-	Height = 10;
+	CubeInstance = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Cube Test"));
+	CubeInstance->SetupAttachment(RootComponent);
+
+	Width = 15;
+	Height = 15;
 	NumberOfMonster = 2;
 	ProbaTriggerSpikes = 0.2;
 
@@ -37,6 +40,8 @@ AMazeGenerator::AMazeGenerator()
 
 	ListNumberKeyByTier.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
 	ListNumberKeyByTier[2] = 3;
+	ListNumberKeyByTier[1] = 2 * ListNumberKeyByTier[2];
+	ListNumberKeyByTier[0] = 2 * ListNumberKeyByTier[1];
 
 	// Setup the possible direction
 	PossibleDirection.Emplace(FVector2D(0, 1));
@@ -58,12 +63,20 @@ void AMazeGenerator::BeginPlay()
 	Height = MazeGI->Size[1];
 	NumberOfMonster = MazeGI->NBEnemies;
 
+	ListNumberKeyByTier.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
+	ListNumberKeyByTier[2] = 3;
+	ListNumberKeyByTier[1] = 3 * ListNumberKeyByTier[2];
+	ListNumberKeyByTier[0] = 3 * ListNumberKeyByTier[1];
+
 	NewMazeMap();
 
 	MazeGenMultiStepRandomize();
 
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%d	%d"), PossibleDirection[0].X, PossibleDirection[0].Y));
+	SpawnKeyDoor();
+
+	TriggerSpikesSpawn();
+
+	MonsterAISpawn(); 
 }
 
 // Called every frame
@@ -161,6 +174,7 @@ bool AMazeGenerator::IsPosInBound(FVector2D pos)
 	return true;
 }
 
+// Direction to EDirection enum
 EDirection AMazeGenerator::VecToEDir(FVector2D direction)
 {
 	int Index = PossibleDirection.Find(direction);
@@ -180,16 +194,55 @@ EDirection AMazeGenerator::VecToEDir(FVector2D direction)
 	}
 }
 
+// Find the direction of the open wall for dead end node
+FVector2D AMazeGenerator::FindDirDeadEnd(FNode* DeadEnd)
+{
+	FVector2D DeadEndDir = DeadEnd->LinkDirection;
+
+	if (DeadEndDir.IsZero()) {
+		for (FVector2D NodeDir : PossibleDirection) {
+			if (!IsPosInBound(DeadEnd->Position + NodeDir)) continue;
+
+			FNode Neighbour = MazeMap[GetNeighbourViaDirection(DeadEnd->Position, NodeDir)];
+
+			if (MazeMap[GetNeighbourViaDirection(Neighbour.Position, Neighbour.LinkDirection)] != *DeadEnd) continue;
+
+			DeadEndDir = PossibleDirection[(PossibleDirection.Find(Neighbour.LinkDirection) + 2) % 4]; // Ugly
+		}
+	}
+
+	return DeadEndDir;
+}
+
+// Update the node for dead end cases
+void AMazeGenerator::UpdateNodeForDeadEnd(FNode* Node)
+{
+	if (!Node->isDeadEnd) {
+		ListUnpopulatedDeadEnd.Remove(*Node);
+		return;
+	}
+
+	if (!Node->Item) {
+		ListUnpopulatedDeadEnd.AddUnique(*Node);
+		return;
+	}
+
+	Node->UpdateTransformItem(FindDirDeadEnd(Node), CellSize);
+}
+
 // TODO Might need to refactor this function (my eyes are bleeding)
 // Generate a new Maze map (default map)
 void AMazeGenerator::NewMazeMap()
 {
 	// Empty Array
 	MazeMap.Empty();
+	ListUnpopulatedDeadEnd.Empty();
+	ListPopulatedDeadEnd.Empty();
 
 	// Clear all the instances
 	ISMFloorComponent->ClearInstances();
 	ISMWallComponent->ClearInstances();
+	CubeInstance->ClearInstances();
 
 	// Generate the outer walls of the maze
 	GenerateOuterWalls();
@@ -286,24 +339,22 @@ void AMazeGenerator::MazeGenIteration()
 	NextNode->SetDirection(FVector2D(0, 0));
 	NextNode->AddLinkNbOthers();
 
-	if (OriginNode->isDeadEnd)
-		ListUnpopulatedDeadEnd.AddUnique(*OriginNode);
-
-	if (NextNode->isDeadEnd)
-		ListUnpopulatedDeadEnd.AddUnique(*NextNode);
-
-	if (TargetNextNode->isDeadEnd)
-		ListUnpopulatedDeadEnd.AddUnique(*TargetNextNode);
+	// Update the list of unpopulated dead end and 
+	// if necessary the orientation of the items/door of the dead end
+	UpdateNodeForDeadEnd(OriginNode);
+	UpdateNodeForDeadEnd(NextNode);
+	UpdateNodeForDeadEnd(TargetNextNode);
 
 	// Rearrange Items and Doors in the dead ends
-	if (!NextNode->Item.IsNull() && NextOriginWasDeadEnd && NextNode->isDeadEnd) {
-		if (TargetNextNode->isDeadEnd && TargetNextNode->Item.IsNull()) {
+	if (NextNode->Item && !NextNode->isDeadEnd) {
+		if (!TargetNextNode->Item && TargetNextNode->isDeadEnd) {
 			TargetNextNode->Door = NextNode->Door;
 			TargetNextNode->Item = NextNode->Item;
 
+			TargetNextNode->UpdateTransformItem(TargetNextNode->LinkDirection, CellSize);
+		
+			ListUnpopulatedDeadEnd.Remove(*TargetNextNode);
 			ListPopulatedDeadEnd.Emplace(*TargetNextNode);
-
-			TargetNextNode->UpdateTransformItem();
 		}
 		else {
 			FNode RandNode = ListUnpopulatedDeadEnd[FMath::RandRange(0, ListUnpopulatedDeadEnd.Num() - 1)];
@@ -314,31 +365,35 @@ void AMazeGenerator::MazeGenIteration()
 			PtrRandNode->Door = NextNode->Door;
 			PtrRandNode->Item = NextNode->Item;
 
-			ListPopulatedDeadEnd.Emplace(*PtrRandNode);
+			PtrRandNode->UpdateTransformItem(PtrRandNode->LinkDirection, CellSize);
 
-			PtrRandNode->UpdateTransformItem();
+			ListPopulatedDeadEnd.Emplace(*PtrRandNode);			
 		}
 
+		NextNode->Door = nullptr;
+		NextNode->Item = nullptr;
+
 		ListPopulatedDeadEnd.Remove(*NextNode);
-		ListUnpopulatedDeadEnd.Emplace(*NextNode);
 	}
 
-	if (!OriginNode->Item.IsNull() && OriginWasDeadEnd && !OriginNode->isDeadEnd) {
-		if (NextNode->isDeadEnd && NextNode->Item.IsNull()) {
+	if (OriginNode->Item && !OriginNode->isDeadEnd) {
+		if (!NextNode->Item && NextNode->isDeadEnd) {
 			NextNode->Door = OriginNode->Door;
 			NextNode->Item = OriginNode->Item;
 
-			ListPopulatedDeadEnd.Emplace(*NextNode);
+			NextNode->UpdateTransformItem(OriginNode->LinkDirection, CellSize);
 
-			NextNode->UpdateTransformItem();
+			ListUnpopulatedDeadEnd.Remove(*NextNode);
+			ListPopulatedDeadEnd.Emplace(*NextNode);
 		}
-		else if (TargetNextNode->isDeadEnd && TargetNextNode->Item.IsNull()) {
+		else if (!TargetNextNode->Item && TargetNextNode->isDeadEnd) {
 			TargetNextNode->Door = OriginNode->Door;
 			TargetNextNode->Item = OriginNode->Item;
 
+			TargetNextNode->UpdateTransformItem(TargetNextNode->LinkDirection, CellSize);
+		
+			ListUnpopulatedDeadEnd.Remove(*TargetNextNode);
 			ListPopulatedDeadEnd.Emplace(*TargetNextNode);
-
-			TargetNextNode->UpdateTransformItem();
 		}
 		else {
 			FNode RandNode = ListUnpopulatedDeadEnd[FMath::RandRange(0, ListUnpopulatedDeadEnd.Num() - 1)];
@@ -346,13 +401,16 @@ void AMazeGenerator::MazeGenIteration()
 
 			FNode* PtrRandNode = &MazeMap[RandNode.Position.X + RandNode.Position.Y * Width];
 
-			RandNode.Door = OriginNode->Door;
-			RandNode.Item = OriginNode->Item;
+			PtrRandNode->Door = OriginNode->Door;
+			PtrRandNode->Item = OriginNode->Item;
+
+			PtrRandNode->UpdateTransformItem(PtrRandNode->LinkDirection, CellSize);
 
 			ListPopulatedDeadEnd.Emplace(*PtrRandNode);
-
-			RandNode.UpdateTransformItem();
 		}
+
+		OriginNode->Door = nullptr;
+		OriginNode->Item = nullptr;
 
 		ListPopulatedDeadEnd.Remove(*OriginNode);
 	}
@@ -424,9 +482,25 @@ void AMazeGenerator::TriggerSpikesClear()
 // test gen key 
 void AMazeGenerator::SpawnKeyDoor()
 {
-	for (int i = 0; i < ListNumberKeyByTier[int(EKeyDoorTier::KeyDoor_Rare)]; i++) {
+	ClearObjects();
+
+	int NewKeyNumber = ListNumberKeyByTier[int(EKeyDoorTier::KeyDoor_Rare)];
+	for (int i = 0; i < NewKeyNumber; i++) {
+		ListNumberKeyByTier[int(EKeyDoorTier::KeyDoor_Rare)]--;
 		KeySpawn(EKeyDoorTier::KeyDoor_Rare);
 	}
+}
+
+// test clear objects 
+void AMazeGenerator::ClearObjects()
+{
+	if (ListObjects.IsEmpty()) return;
+
+	for (int i = 0; i < ListObjects.Num(); i++) {
+		ListObjects[i]->Destroy();
+	}
+
+	ListObjects.Empty();
 }
 
 // Spawn the Monster AI in the maze
@@ -438,24 +512,57 @@ void AMazeGenerator::KeySpawn(EKeyDoorTier Tier)
 	FNode* PtrRandNode = &MazeMap[RandNode.Position.X + RandNode.Position.Y * Width];
 
 	AKeyItem* key = GetWorld()->SpawnActor<AKeyItem>(KeyBP);
-	key->KeyTier = Tier;
-	RandNode.Item = key;
+	key->SetTier(Tier);
+	key->UpdateKeyMesh();
+	PtrRandNode->Item = key;
+
+	ADoorObject* door = nullptr;
 
 	switch (Tier)
 	{
 	case EKeyDoorTier::KeyDoor_Uncommon:
-		ADoorObject* door = GetWorld()->SpawnActor<ADoorObject>(DoorBP);
-		door->DoorTier = EKeyDoorTier::KeyDoor_Common;
-		RandNode.Door = door;
+		door = GetWorld()->SpawnActor<ADoorObject>(DoorBP);
+		door->SetTier(EKeyDoorTier::KeyDoor_Common);
+		PtrRandNode->Door = door;
 		break;
 	case EKeyDoorTier::KeyDoor_Rare:
-		ADoorObject* door = GetWorld()->SpawnActor<ADoorObject>(DoorBP);
-		door->DoorTier = EKeyDoorTier::KeyDoor_Uncommon;
-		RandNode.Door = door;
+		door = GetWorld()->SpawnActor<ADoorObject>(DoorBP);
+		door->SetTier(EKeyDoorTier::KeyDoor_Uncommon);
+		PtrRandNode->Door = door;
 		break;
 	default:
 		break;
 	}
 
+	FVector2D DoorDir = FindDirDeadEnd(PtrRandNode);
+	PtrRandNode->UpdateTransformItem(DoorDir, CellSize);
+
+	ListObjects.Emplace(key);
 	ListPopulatedDeadEnd.Emplace(*PtrRandNode);
+	
+	if (door) {
+		ListObjects.Emplace(door);
+
+		int NewKeyNumber = 1 + FMath::RandRange(0, FMath::Max(0, int(ListNumberKeyByTier[int(door->DoorTier)] * 0.8f) - ListNumberKeyByTier[int(Tier)]));
+
+		if (!ListNumberKeyByTier[int(Tier)])
+			NewKeyNumber = ListNumberKeyByTier[int(door->DoorTier)];
+
+		ListNumberKeyByTier[int(door->DoorTier)] -= NewKeyNumber;
+
+		door->SetRequireKey(NewKeyNumber);
+
+		for (int i = 0; i < NewKeyNumber; i++)
+			KeySpawn(door->DoorTier);
+	}
+}
+
+// Display Dead End
+void AMazeGenerator::DisplayDeadEnd()
+{
+	CubeInstance->ClearInstances();
+
+	for (FNode node : ListUnpopulatedDeadEnd) {
+		CubeInstance->AddInstance(FTransform(FQuat::Identity, FVector(node.Position.X * CellSize, node.Position.Y * CellSize, 0), FVector::OneVector));
+	}
 }

@@ -11,10 +11,14 @@ ATriggerSpikes::ATriggerSpikes()
 
 	BoxCollisionComponent = CastChecked<UBoxComponent>(GetCollisionComponent());
 
+	RootComponent->bHiddenInGame = false;
+	BoxCollisionComponent->bHiddenInGame = true;
+
 	SpikesMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Spikes"));
 	SpikesMesh->SetupAttachment(BoxCollisionComponent);
 	SpikesMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 	SpikesMesh->SetGenerateOverlapEvents(false);
+	SpikesMesh->bHiddenInGame = false;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ConeDefault(TEXT("/Engine/BasicShapes/Cone.Cone"));
 	if (ConeDefault.Succeeded()) {

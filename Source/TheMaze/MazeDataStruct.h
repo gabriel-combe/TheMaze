@@ -56,6 +56,10 @@ struct FNode {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
 	TObjectPtr<AActor> Item = nullptr;
 
+	// Check if it has item
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Node")
+	bool HasItem = false;
+
 	FNode(FVector2D Pos, FVector2D Direction, bool DeadEnd)
 	{
 		isDeadEnd = DeadEnd;

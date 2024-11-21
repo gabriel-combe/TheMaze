@@ -34,6 +34,7 @@ AMazeGenerator::AMazeGenerator()
 	Width = 15;
 	Height = 15;
 	NumberOfMonster = 2;
+	EvolutionTime = 10;
 	ProbaTriggerSpikes = 0.2;
 
 	MaxDeadEnd = int(Width * Height * 0.2f);
@@ -62,6 +63,7 @@ void AMazeGenerator::BeginPlay()
 	Width = MazeGI->Size[0];
 	Height = MazeGI->Size[1];
 	NumberOfMonster = MazeGI->NBEnemies;
+	EvolutionTime = MazeGI->EvolutionTime;
 
 	ListNumberKeyByTier.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
 	ListNumberKeyByTier[2] = 3;
@@ -77,6 +79,10 @@ void AMazeGenerator::BeginPlay()
 	TriggerSpikesSpawn();
 
 	MonsterAISpawn(); 
+
+	FTimerHandle TimerHandleMazeEvolution;
+	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &AMazeGenerator::MazeGenEvolution);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandleMazeEvolution, Delegate, EvolutionTime, true, 0.0f);
 }
 
 // Called every frame
@@ -222,7 +228,7 @@ void AMazeGenerator::UpdateNodeForDeadEnd(FNode* Node)
 		return;
 	}
 
-	if (!Node->Item) {
+	if (!Node->HasItem) {
 		ListUnpopulatedDeadEnd.AddUnique(*Node);
 		return;
 	}
@@ -346,10 +352,11 @@ void AMazeGenerator::MazeGenIteration()
 	UpdateNodeForDeadEnd(TargetNextNode);
 
 	// Rearrange Items and Doors in the dead ends
-	if (NextNode->Item && !NextNode->isDeadEnd) {
-		if (!TargetNextNode->Item && TargetNextNode->isDeadEnd) {
+	if (NextNode->HasItem && !NextNode->isDeadEnd) {
+		if (!TargetNextNode->HasItem && TargetNextNode->isDeadEnd) {
 			TargetNextNode->Door = NextNode->Door;
 			TargetNextNode->Item = NextNode->Item;
+			TargetNextNode->HasItem = true;
 
 			TargetNextNode->UpdateTransformItem(TargetNextNode->LinkDirection, CellSize);
 		
@@ -364,6 +371,7 @@ void AMazeGenerator::MazeGenIteration()
 
 			PtrRandNode->Door = NextNode->Door;
 			PtrRandNode->Item = NextNode->Item;
+			PtrRandNode->HasItem = true;
 
 			PtrRandNode->UpdateTransformItem(PtrRandNode->LinkDirection, CellSize);
 
@@ -372,23 +380,26 @@ void AMazeGenerator::MazeGenIteration()
 
 		NextNode->Door = nullptr;
 		NextNode->Item = nullptr;
+		NextNode->HasItem = false;
 
 		ListPopulatedDeadEnd.Remove(*NextNode);
 	}
 
-	if (OriginNode->Item && !OriginNode->isDeadEnd) {
-		if (!NextNode->Item && NextNode->isDeadEnd) {
+	if (OriginNode->HasItem && !OriginNode->isDeadEnd) {
+		if (!NextNode->HasItem && NextNode->isDeadEnd) {
 			NextNode->Door = OriginNode->Door;
 			NextNode->Item = OriginNode->Item;
+			NextNode->HasItem = true;
 
 			NextNode->UpdateTransformItem(OriginNode->LinkDirection, CellSize);
 
 			ListUnpopulatedDeadEnd.Remove(*NextNode);
 			ListPopulatedDeadEnd.Emplace(*NextNode);
 		}
-		else if (!TargetNextNode->Item && TargetNextNode->isDeadEnd) {
+		else if (!TargetNextNode->HasItem && TargetNextNode->isDeadEnd) {
 			TargetNextNode->Door = OriginNode->Door;
 			TargetNextNode->Item = OriginNode->Item;
+			TargetNextNode->HasItem = true;
 
 			TargetNextNode->UpdateTransformItem(TargetNextNode->LinkDirection, CellSize);
 		
@@ -403,6 +414,7 @@ void AMazeGenerator::MazeGenIteration()
 
 			PtrRandNode->Door = OriginNode->Door;
 			PtrRandNode->Item = OriginNode->Item;
+			PtrRandNode->HasItem = true;
 
 			PtrRandNode->UpdateTransformItem(PtrRandNode->LinkDirection, CellSize);
 
@@ -411,6 +423,7 @@ void AMazeGenerator::MazeGenIteration()
 
 		OriginNode->Door = nullptr;
 		OriginNode->Item = nullptr;
+		OriginNode->HasItem = false;
 
 		ListPopulatedDeadEnd.Remove(*OriginNode);
 	}
@@ -422,6 +435,12 @@ void AMazeGenerator::MazeGenIteration()
 void AMazeGenerator::MazeGenMultiStepRandomize()
 {
 	for (int i = 0; i < Width * Height * 10; i++)
+		MazeGenIteration();
+}
+
+void AMazeGenerator::MazeGenEvolution()
+{
+	for (int i = 0; i < Width * Height; i++)
 		MazeGenIteration();
 }
 
@@ -510,6 +529,8 @@ void AMazeGenerator::KeySpawn(EKeyDoorTier Tier)
 	ListUnpopulatedDeadEnd.Remove(RandNode);
 
 	FNode* PtrRandNode = &MazeMap[RandNode.Position.X + RandNode.Position.Y * Width];
+
+	PtrRandNode->HasItem = true;
 
 	AKeyItem* key = GetWorld()->SpawnActor<AKeyItem>(KeyBP);
 	key->SetTier(Tier);

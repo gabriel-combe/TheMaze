@@ -126,6 +126,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
 	int NumberOfMonster;
 
+	// Time between Maze Evolution
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
+	int EvolutionTime;
+
 	// List of the total number of key for each Tier
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
 	TArray<int> ListNumberKeyByTier;
@@ -168,6 +172,10 @@ public:
 	// Randomize the maze
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void MazeGenMultiStepRandomize();
+
+	// Make the maze evolve
+	UFUNCTION(BlueprintCallable, Category = "Maze")
+	void MazeGenEvolution();
 
 	// Get the index of a neighbour node via direction
 	UFUNCTION(BlueprintCallable, Category = "Maze")

@@ -11,7 +11,7 @@ ATriggerSpikes::ATriggerSpikes()
 
 	BoxCollisionComponent = CastChecked<UBoxComponent>(GetCollisionComponent());
 
-	RootComponent->bHiddenInGame = false;
+	SetActorHiddenInGame(false);
 	BoxCollisionComponent->bHiddenInGame = true;
 
 	SpikesMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Spikes"));

@@ -18,12 +18,19 @@ protected:
 	UMazeGameInstance();
 	
 public:
+	// Size of the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
 	TArray<int> Size;
 
+	// Number of enemies in the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
 	int NBEnemies = 2;
 
+	// Time to complete the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
 	int ChronoTime = 180;
+
+	// Time between maze evolution
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
+	int EvolutionTime = 10;
 };

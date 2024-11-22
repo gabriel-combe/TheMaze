@@ -83,11 +83,11 @@ void ADoorObject::Tick(float DeltaTime)
 
 	// Rotate Doors
 	if (Open) {
-		FQuat newRotL = FMath::Lerp(FQuat(DoorLComp->GetRelativeRotation()), FQuat(FRotator(0.0f, 90.0f, 0.0f)), 0.01f);
+		FQuat newRotL = FMath::Lerp(FQuat(DoorLComp->GetRelativeRotation()), FQuat(FRotator(0.0f, 90.0f, 0.0f)), 0.05f);
 		DoorLComp->SetRelativeRotation(newRotL);
 		DoorLComp->SetRelativeLocation(newRotL.RotateVector(FVector(92.0f, 0.0f, 0.0f)) + FVector(-92.0f, 0.0f, 0.0f));
 
-		FQuat newRotR = FMath::Lerp(FQuat(DoorRComp->GetRelativeRotation()), FQuat(FRotator(0.0f, -90.0f, 0.0f)), 0.01f);
+		FQuat newRotR = FMath::Lerp(FQuat(DoorRComp->GetRelativeRotation()), FQuat(FRotator(0.0f, -90.0f, 0.0f)), 0.05f);
 		DoorRComp->SetRelativeRotation(newRotR);
 		DoorRComp->SetRelativeLocation(newRotR.RotateVector(FVector(-92.0f, 0.0f, 0.0f)) + FVector(92.0f, 0.0f, 0.0f));
 	}

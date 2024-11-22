@@ -21,6 +21,9 @@ void AMonsterAIController::OnPossess(APawn* InPawn)
 	UBlackboardComponent* b;
 	UseBlackboard(tree->BlackboardAsset, b);
 	Blackboard = b;
+
+	monster->SetBlackboard(b);
+
 	RunBehaviorTree(tree);
 }
 
@@ -31,11 +34,11 @@ void AMonsterAIController::SetupPerceptionSystem()
 
 	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component")));
 
-	SightConfig->SightRadius = 800.0f;
-	SightConfig->LoseSightRadius = SightConfig->SightRadius * 2;
+	SightConfig->SightRadius = 400.0f;
+	SightConfig->LoseSightRadius = SightConfig->SightRadius * 1.5;
 	SightConfig->PeripheralVisionAngleDegrees = 120.0f;
-	SightConfig->SetMaxAge(15.0f);
-	SightConfig->AutoSuccessRangeFromLastSeenLocation = 1200.0f;
+	SightConfig->SetMaxAge(5.0f);
+	SightConfig->AutoSuccessRangeFromLastSeenLocation = 600.0f;
 	SightConfig->DetectionByAffiliation.bDetectEnemies = false;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;

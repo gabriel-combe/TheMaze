@@ -28,6 +28,9 @@ private:
 	UFUNCTION()
 	void OnTargetDetected(AActor* Actor, const FAIStimulus Stimulus);
 
+	// Timer Handle for the stun
+	FTimerHandle TimerHandleStun;
+
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
@@ -37,5 +40,4 @@ public:
 	// Tell if the player in in sight
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	bool IsPlayerInSight = false;
-	
 };

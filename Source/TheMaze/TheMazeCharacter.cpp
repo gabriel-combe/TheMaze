@@ -287,7 +287,8 @@ void ATheMazeCharacter::DashCharacter()
 
 	XYDir.Normalize();
 
-	LaunchCharacter(XYDir * DashDistance, true, true);
+	//LaunchCharacter(XYDir * DashDistance, true, true);
+	GetCharacterMovement()->Velocity = XYDir * DashPower + GetVelocity();
 }
 
 void ATheMazeCharacter::SetInvincibility()
@@ -299,11 +300,14 @@ void ATheMazeCharacter::SetInvincibility()
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleInvincibility, Delegate, InvincibilityDuration, false);
 
 	Invincible = true;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 }
 
 void ATheMazeCharacter::ResetInvincibility()
 {
 	Invincible = false;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 }
 
 void ATheMazeCharacter::GiveSpeedBoost()

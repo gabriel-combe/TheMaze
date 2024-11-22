@@ -97,9 +97,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int MaxAbilityPoints = 3;
 
-	/** Dash distance */
+	/** Dash power */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true"))
-	float DashDistance = 4000.0f;
+	float DashPower = 10000.0f;
 
 	/** Maze game instance */
 	TObjectPtr<UMazeGameInstance> MazeGI;
@@ -223,6 +223,10 @@ public:
 	/** Activate Invincibility **/
 	UFUNCTION(BlueprintCallable, Category = "Player|Ability")
 	void SetInvincibility();
+
+	/** Activate Invincibility **/
+	UFUNCTION(BlueprintCallable, Category = "Player|Ability")
+	bool IsInvincible() const { return Invincible; };
 
 	/** Deactivate invincibility **/
 	void ResetInvincibility();

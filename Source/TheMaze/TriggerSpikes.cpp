@@ -8,14 +8,12 @@
 
 ATriggerSpikes::ATriggerSpikes()
 {
-
-	BoxCollisionComponent = CastChecked<UBoxComponent>(GetCollisionComponent());
-
 	SetActorHiddenInGame(false);
-	BoxCollisionComponent->bHiddenInGame = true;
+	GetSpriteComponent()->bHiddenInGame = true;
+	GetCollisionComponent()->bHiddenInGame = true;
 
 	SpikesMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Spikes"));
-	SpikesMesh->SetupAttachment(BoxCollisionComponent);
+	SpikesMesh->SetupAttachment(GetCollisionComponent());
 	SpikesMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 	SpikesMesh->SetGenerateOverlapEvents(false);
 	SpikesMesh->bHiddenInGame = false;

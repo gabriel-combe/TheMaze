@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "DoorObject.h"
 #include "KeyItem.h"
+#include "TriggerSpikes.h"
 #include "Engine/DataTable.h"
 #include "MazeDataStruct.generated.h"
 
@@ -55,6 +56,10 @@ struct FNode {
 	// Item associated to this node if it is a dead end
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
 	TObjectPtr<AActor> Item = nullptr;
+
+	// Spike associated to this node if it is not a dead end
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Node")
+	TObjectPtr<ATriggerSpikes> Spike = nullptr;
 
 	// Check if it has item
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Node")
@@ -126,6 +131,20 @@ struct FNode {
 		isDeadEnd = (LinkNumberFromOthers == 0 && LinkDirection != FVector2D::ZeroVector) || (LinkNumberFromOthers == 1 && LinkDirection == FVector2D::ZeroVector);
 	}
 
+	void TransferItemDoor(FNode* Node)
+	{
+		Item = Node->Item;
+		Door = Node->Door;
+		HasItem = true;
+	}
+
+	void ClearItemDoor()
+	{
+		Item = nullptr;
+		Door = nullptr;
+		HasItem = false;
+	}
+
 	void UpdateTransformItem(FVector2D dir, int CellSize)
 	{
 		int RotFactor = 0;
@@ -137,7 +156,8 @@ struct FNode {
 		else if (dir.X == 1)
 			RotFactor = 3;
 
-		Item->SetActorRelativeTransform(FTransform(FRotator(0, 90 * RotFactor, 0), FVector(Position.X * CellSize, Position.Y * CellSize, 0), FVector::OneVector));
+		if (Item)
+			Item->SetActorRelativeTransform(FTransform(FRotator(0, 90 * RotFactor, 0), FVector(Position.X * CellSize, Position.Y * CellSize, 0), FVector::OneVector));
 
 		if (Door)
 			Door->SetActorRelativeTransform(FTransform(FRotator(0, 90 * RotFactor, 0), FVector(dir.X * (CellSize*0.5f) + Position.X * CellSize, dir.Y * (CellSize * 0.5f) + Position.Y * CellSize, 0), FVector::OneVector));

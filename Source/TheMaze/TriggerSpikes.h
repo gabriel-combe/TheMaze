@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/TriggerBox.h"
+#include "Components/BillboardComponent.h"
 #include "Components/BoxComponent.h"
 #include "TriggerSpikes.generated.h"
 
@@ -26,9 +27,6 @@ private:
 	// Mesh of the spikes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* SpikesMesh;
-
-	// Ref to the collision component of the trigger box
-	UBoxComponent* BoxCollisionComponent;
 
 protected:
 	virtual void BeginPlay() override;

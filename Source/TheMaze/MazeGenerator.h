@@ -11,6 +11,7 @@
 #include "DoorObject.h"
 #include "KeyItem.h"
 #include "HealthPackItem.h"
+#include "TheMazeCharacter.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "MazeGenerator.generated.h"
@@ -51,11 +52,14 @@ private:
 	// List of Objects
 	TArray<AActor*> ListObjects;
 
+	// Player start transform
+	FTransform StartTransform;
+
 	// Generate Outer walls function
 	void GenerateOuterWalls();
 
 	// Generate Walls of a Node
-	void GenerateNodeWalls(FNode& CurrentNode, int CurrentWallIndex, int WallIndexOffset);
+	void GenerateNodeWalls(FNode& CurrentNode, int CurrentWallIndex);
 
 	// Move Wall on Z
 	void MoveWallByDir(FNode& Node, EDirection dir, float ZMove);
@@ -130,6 +134,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
 	int EvolutionTime;
 
+	// Number of Rare key to escape the Maze
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
+	int NumberOfRareKey;
+
 	// List of the total number of key for each Tier
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
 	TArray<int> ListNumberKeyByTier;
@@ -177,6 +185,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Maze")
 	void MazeGenEvolution();
 
+	// Spawn Start and End
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze")
+	void SpawnStartEnd();
+
 	// Get the index of a neighbour node via direction
 	UFUNCTION(BlueprintCallable, Category = "Maze")
 	int GetNeighbourViaDirection(FVector2D pos, FVector2D dir) const { return (pos.X + dir.X) + (pos.Y + dir.Y) * Width; }
@@ -208,6 +220,10 @@ public:
 	// Spawn the Monster AI in the maze
 	UFUNCTION(BlueprintCallable, Category = "Maze")
 	void KeySpawn(EKeyDoorTier Tier);
+
+	// Called to Spawn the Player at the Start Room
+	UFUNCTION(BlueprintCallable, Category = "Maze")
+	void SpawnPlayer();
 
 	// Display Dead End
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze")

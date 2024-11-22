@@ -33,4 +33,8 @@ public:
 	// Time between maze evolution
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
 	int EvolutionTime = 10;
+
+	// Number of Rare key to complete the maze
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
+	int NBRareKey = 3;
 };

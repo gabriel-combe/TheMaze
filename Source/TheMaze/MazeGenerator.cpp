@@ -523,7 +523,7 @@ void AMazeGenerator::SpawnStartEnd()
 	ISMWallComponent->AddInstance(FTransform(StartDoorRot * FQuat(FVector::UpVector, PI), StartDoorPos + StartDoorRot * FVector(0, -CellSize, 0), FVector::OneVector));
 
 	// Set Player Starting Transform
-	StartTransform = FTransform(StartDoorRot, StartDoorPos + FVector(CellSize, 0, 90), FVector::OneVector);
+	StartTransform = FTransform(StartDoorRot, StartDoorPos + StartDoorRot * FVector(CellSize, 0, 90), FVector::OneVector);
 
 	// Add a key in the starting room
 	AKeyItem* StartKey = GetWorld()->SpawnActor<AKeyItem>(KeyBP, FTransform(StartDoorRot * FQuat(FVector::UpVector, PI * 0.5f), StartDoorPos + StartDoorRot * FVector(CellSize * 0.5f, 0, 0), FVector::OneVector));
@@ -534,7 +534,7 @@ void AMazeGenerator::SpawnStartEnd()
 	while (!ValidPos) {
 		IndexEnd = FMath::RandRange(0, MaxOuterWall);
 
-		if (IndexEnd == IndexStart || IndexEnd == IndexStart-1 || IndexEnd == IndexStart+1) continue;
+		if (FMath::Abs(IndexEnd-IndexStart) <= 1) continue;
 
 		ISMWallComponent->GetInstanceTransform(IndexEnd, WallTransform);
 

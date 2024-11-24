@@ -35,7 +35,8 @@ AMazeGenerator::AMazeGenerator()
 	Height = 15;
 	NumberOfMonster = 2;
 	EvolutionTime = 10;
-	ProbaTriggerSpikes = 0.1;
+	ProbaTriggerSpikes = 0.1f;
+	ProbaHealthPack = 0.1f;
 
 	MaxDeadEnd = int(Width * Height * 0.2f);
 
@@ -65,6 +66,8 @@ void AMazeGenerator::BeginPlay()
 	NumberOfMonster = MazeGI->NBEnemies;
 	EvolutionTime = MazeGI->EvolutionTime;
 	NumberOfRareKey = MazeGI->NBRareKey;
+	ProbaTriggerSpikes = MazeGI->ProbaTriggerSpikes;
+	ProbaHealthPack = MazeGI->ProbaHealthPack;
 
 	ListNumberKeyByTier.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
 	ListNumberKeyByTier[2] = NumberOfRareKey;
@@ -81,9 +84,19 @@ void AMazeGenerator::BeginPlay()
 	SpawnKeyDoor();
 
 	// Spawn Health Pack
+	HealthPackSpawn();
 
 	// Spawn the Trigger Spikes
 	TriggerSpikesSpawn();
+
+	// Relocate and Resize the NavMesh for the AI
+	if (NavMesh) {
+		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+		NavMesh->SetActorRelativeLocation(FVector((Width - 1) * CellSize * 0.5f, (Height - 1) * CellSize * 0.5f, 0));
+		NavMesh->GetRootComponent()->Bounds.BoxExtent.X *= Width;
+		NavMesh->GetRootComponent()->Bounds.BoxExtent.Y *= Height;
+		NavSys->OnNavigationBoundsUpdated(NavMesh);
+	}
 
 	// Spawn the MonsterAI
 	MonsterAISpawn(); 
@@ -279,6 +292,11 @@ void AMazeGenerator::UpdateNodeForDeadEnd(FNode* Node)
 // Generate a new Maze map (default map)
 void AMazeGenerator::NewMazeMap()
 {
+	// Remove every objects
+	MonsterAIClear();
+	TriggerSpikesClear();
+	ClearObjects();
+
 	// Empty Array
 	MazeMap.Empty();
 	ListUnpopulatedDeadEnd.Empty();
@@ -523,7 +541,7 @@ void AMazeGenerator::SpawnStartEnd()
 	ISMWallComponent->AddInstance(FTransform(StartDoorRot * FQuat(FVector::UpVector, PI), StartDoorPos + StartDoorRot * FVector(0, -CellSize, 0), FVector::OneVector));
 
 	// Set Player Starting Transform
-	StartTransform = FTransform(StartDoorRot, StartDoorPos + StartDoorRot * FVector(CellSize, 0, 90), FVector::OneVector);
+	StartTransform = FTransform(StartDoorRot, StartDoorPos + StartDoorRot * FVector(CellSize, 0, 0), FVector::OneVector);
 
 	// Add a key in the starting room
 	AKeyItem* StartKey = GetWorld()->SpawnActor<AKeyItem>(KeyBP, FTransform(StartDoorRot * FQuat(FVector::UpVector, PI * 0.5f), StartDoorPos + StartDoorRot * FVector(CellSize * 0.5f, 0, 0), FVector::OneVector));
@@ -557,6 +575,7 @@ void AMazeGenerator::SpawnStartEnd()
 	ADoorObject* EndDoor = GetWorld()->SpawnActor<ADoorObject>(DoorBP, FTransform(EndDoorRot * FQuat(FVector::UpVector, PI * 0.5f), EndDoorPos, FVector::OneVector));
 	EndDoor->SetRequireKey(NumberOfRareKey);
 	EndDoor->SetTier(EKeyDoorTier::KeyDoor_Rare);
+	ListObjects.Emplace(EndDoor);
 
 	// Create the End Room
 	ISMFloorComponent->AddInstance(FTransform(FQuat::Identity, EndDoorPos + EndDoorRot * FVector(CellSize, 0, 0), 2 * FVector::OneVector));
@@ -565,6 +584,10 @@ void AMazeGenerator::SpawnStartEnd()
 	ISMWallComponent->AddInstance(FTransform(EndDoorRot * FQuat(FVector::UpVector, PI * 0.5f), EndDoorPos + EndDoorRot * FVector(CellSize, CellSize, 0), FVector(1, 1.925f, 1)));
 	ISMWallComponent->AddInstance(FTransform(EndDoorRot * FQuat(FVector::UpVector, PI), EndDoorPos + EndDoorRot * FVector(0, CellSize, 0), FVector::OneVector));
 	ISMWallComponent->AddInstance(FTransform(EndDoorRot * FQuat(FVector::UpVector, PI), EndDoorPos + EndDoorRot * FVector(0, -CellSize, 0), FVector::OneVector));
+
+	// Set Escape ladder
+	AEscapeLadder* ladder = GetWorld()->SpawnActor<AEscapeLadder>(LadderBP, FTransform(EndDoorRot, EndDoorPos + EndDoorRot * FVector(CellSize, 0, 0), FVector::OneVector));
+	ListObjects.Emplace(ladder);
 }
 
 // Spawn the specified number of MonsterAI
@@ -626,6 +649,26 @@ void AMazeGenerator::TriggerSpikesClear()
 	}
 
 	ListTriggerSpikes.Empty();
+}
+
+// Spawn the Health Pack in the maze
+void AMazeGenerator::HealthPackSpawn()
+{
+	for (int i = 0; i < ListUnpopulatedDeadEnd.Num(); i++)
+	{
+		FNode* Node = &MazeMap[i];
+
+		if (FMath::SRand() > ProbaHealthPack) continue;
+
+		AHealthPackItem* HealthPack = GetWorld()->SpawnActor<AHealthPackItem>(HealthPackBP, FTransform(GetActorRotation(), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 40), FVector::OneVector));
+		ListObjects.Emplace(HealthPack);
+
+		Node->Item = HealthPack;
+		Node->HasItem = true;
+
+		ListUnpopulatedDeadEnd.Remove(*Node);
+		ListPopulatedDeadEnd.Emplace(*Node);
+	}
 }
 
 // Spawn the specified number of Rare Key

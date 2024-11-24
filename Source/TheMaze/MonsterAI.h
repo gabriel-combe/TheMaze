@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Animation/AnimMontage.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "MonsterAI.generated.h"
 
@@ -20,6 +22,13 @@ private:
 
 	// Blackboard of the controller
 	TObjectPtr<UBlackboardComponent> Blackboard;
+
+	// Box collision for both hands
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UBoxComponent> RightFistCollisionBox;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UBoxComponent> LeftFistCollisionBox;
 
 protected:
 	// Called when the game starts or when spawned

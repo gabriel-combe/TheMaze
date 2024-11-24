@@ -37,4 +37,12 @@ public:
 	// Number of Rare key to complete the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
 	int NBRareKey = 3;
+
+	// Proba to spawn a trigger spike in the maze
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
+	float ProbaTriggerSpikes = 0.1f;
+
+	// Proba to spawn a health pack in the maze
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
+	float ProbaHealthPack = 0.1f;
 };

@@ -11,7 +11,10 @@
 #include "DoorObject.h"
 #include "KeyItem.h"
 #include "HealthPackItem.h"
+#include "EscapeLadder.h"
 #include "TheMazeCharacter.h"
+#include "NavigationSystem.h"
+#include "NavMesh/NavMeshBoundsVolume.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "MazeGenerator.generated.h"
@@ -90,6 +93,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Mesh")
 	UInstancedStaticMeshComponent* CubeInstance;
 
+	// NavMesh for MonsterAI navigation
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|AI")
+	TObjectPtr<ANavMeshBoundsVolume> NavMesh;
+
 	// Instanced static mesh component for the floors
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Mesh")
 	TObjectPtr<UInstancedStaticMeshComponent> ISMFloorComponent;
@@ -118,6 +125,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
 	TSubclassOf<AHealthPackItem> HealthPackBP;
 
+	// Ladder blueprint
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
+	TSubclassOf<AEscapeLadder> LadderBP;
+
 	// Width of the Maze
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
 	int Width;
@@ -138,13 +149,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
 	int NumberOfRareKey;
 
-	// List of the total number of key for each Tier
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
-	TArray<int> ListNumberKeyByTier;
-
 	// Probability that a Trigger Spike spawn in the Maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
 	float ProbaTriggerSpikes;
+
+	// Probability that a Health Pack spawn in the Maze
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
+	float ProbaHealthPack;
+
+	// List of the total number of key for each Tier
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
+	TArray<int> ListNumberKeyByTier;
 
 	// Size of each cell of the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings", meta = (ClampMin = "20.0", UIMin = "20.0"))
@@ -201,19 +216,23 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void MonsterAIClear();
 
-	// Spawn the Monster AI in the maze
+	// Spawn the Trigger Spikes in the maze
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void TriggerSpikesSpawn();
 
-	// Clear all the Monster AI in the maze
+	// Clear all the Trigger Spikes in the maze
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
 	void TriggerSpikesClear();
 
-	// test gen key 
+	// Spawn the Health Pack in the maze
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	void HealthPackSpawn();
+
+	// Spawn Doors and Keys in the Maze
 	UFUNCTION(CallInEditor, Category = "Maze")
 	void SpawnKeyDoor();
 
-	// test clear objects 
+	// Clear all the items in the Maze
 	UFUNCTION(CallInEditor, Category = "Maze")
 	void ClearObjects();
 

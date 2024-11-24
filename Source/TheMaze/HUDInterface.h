@@ -29,4 +29,12 @@ public:
 	// Called when the player deactivate the pause menu
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player|Menu")
 	void DeactivatePause();
+
+	// Called when the player die
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player|Menu")
+	void PlayerDead();
+
+	// Called when the player win
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Player|Menu")
+	void PlayerWin();
 };

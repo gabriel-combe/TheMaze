@@ -10,6 +10,24 @@ AMonsterAI::AMonsterAI()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	RightFistCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("RightFistCollisionBox"));
+	if (RightFistCollisionBox) {
+		RightFistCollisionBox->SetBoxExtent(FVector(15.f, 5.f, 5.f), false);
+		RightFistCollisionBox->SetupAttachment(GetMesh(), FName("hand_r_socket"));
+		RightFistCollisionBox->SetRelativeLocation(FVector(-10.f, 0, 0));
+	}
+
+
+	LeftFistCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftFistCollisionBox"));
+	if (LeftFistCollisionBox) {
+		LeftFistCollisionBox->SetBoxExtent(FVector(15.f, 5.f, 5.f), false);
+		LeftFistCollisionBox->SetupAttachment(GetMesh(), FName("hand_l_socket"));
+		LeftFistCollisionBox->SetRelativeLocation(FVector(10.f, 0, 0));
+	}
+
+	// Set Default Monster tag
+	Tags.Add("Monster");
 }
 
 // Called when the game starts or when spawned

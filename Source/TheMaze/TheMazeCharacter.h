@@ -10,6 +10,7 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/BoxComponent.h"
 #include "Logging/LogMacros.h"
 #include "TheMazeCharacter.generated.h"
 
@@ -41,7 +42,7 @@ private:
 	TArray<int> KeyCount;
 
 	/** Whether the character is dead or not */
-	bool Dead = false;
+	bool IsDead = false;
 
 	/** whether the character is invincible or not */
 	bool Invincible = false;
@@ -101,6 +102,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ability", meta = (AllowPrivateAccess = "true"))
 	float DashPower = 10000.0f;
 
+	// Box collision for the head
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UBoxComponent> HeadCollisionBox;
+
 	/** Maze game instance */
 	TObjectPtr<UMazeGameInstance> MazeGI;
 
@@ -159,6 +164,10 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+	/** Called when there is an overlap with the head of the player */
+	UFUNCTION()
+	void Catched(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
 public:
 	ATheMazeCharacter();
@@ -241,4 +250,8 @@ public:
 	/** Set player dead **/
 	UFUNCTION(BlueprintCallable, Category = "Player|State")
 	void SetDead();
+
+	/** Set player win **/
+	UFUNCTION(BlueprintCallable, Category = "Player|State")
+	void SetWin();
 };

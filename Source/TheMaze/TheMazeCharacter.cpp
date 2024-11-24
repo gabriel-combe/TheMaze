@@ -50,8 +50,12 @@ ATheMazeCharacter::ATheMazeCharacter()
 	// Set the number of Key to 0
 	KeyCount.Init(0, StaticEnum<EKeyDoorTier>()->GetMaxEnumValue());
 
-	// Save the base max walk speed
-	SpeedBase = GetCharacterMovement()->MaxWalkSpeed;
+	HeadCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HeadCollisionBox"));
+	if (HeadCollisionBox) {
+		HeadCollisionBox->SetBoxExtent(FVector(20.f), false);
+		HeadCollisionBox->SetupAttachment(FirstPersonCameraComponent);
+		HeadCollisionBox->SetRelativeLocation(FVector(10.f, 0, 0));
+	}
 
 	// Call the stimulus setup function
 	SetupStimulusSource();
@@ -71,6 +75,9 @@ void ATheMazeCharacter::BeginPlay()
 	// Set chrono time
 	ChronoTime = MazeGI->ChronoTime;
 
+	// Save the base max walk speed
+	SpeedBase = GetCharacterMovement()->MaxWalkSpeed;
+
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::SetDead);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleChrono, Delegate, ChronoTime, false);
 
@@ -78,6 +85,8 @@ void ATheMazeCharacter::BeginPlay()
 	TObjectPtr<AMazeHUD> hud = CastChecked<AMazeHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 	if (hud->GetClass()->ImplementsInterface(UHUDInterface::StaticClass()))
 		PlayerMazeHUD = hud;
+
+	HeadCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ATheMazeCharacter::Catched);
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -192,6 +201,16 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 	GiveSpeedBoost();	
 }
 
+void ATheMazeCharacter::Catched(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!OtherActor->ActorHasTag("Monster") || Invincible) return;
+
+	SetDead();
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "U DEAD BY MONSTER");
+}
+
 void ATheMazeCharacter::SetupStimulusSource()
 {
 	StimulusSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("Stimulus"));
@@ -221,7 +240,7 @@ bool ATheMazeCharacter::HealCharacter(const float HealAmount)
 
 bool ATheMazeCharacter::DamageCharacter(const float DamageAmount)
 {
-	if (Invincible || Dead) return false;
+	if (Invincible || IsDead) return false;
 
 	CurrentHealth -= DamageAmount;
 
@@ -332,5 +351,19 @@ void ATheMazeCharacter::SetDead()
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "UR DEAD");
 
-	Dead = true;
+	IsDead = true;
+
+	IHUDInterface::Execute_PlayerDead(PlayerMazeHUD);
+
+	DisableInput(GetLocalViewingPlayerController());
+}
+
+void ATheMazeCharacter::SetWin()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "U WON");
+
+	IHUDInterface::Execute_PlayerWin(PlayerMazeHUD);
+
+	DisableInput(GetLocalViewingPlayerController());
 }

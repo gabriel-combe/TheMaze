@@ -40,4 +40,12 @@ public:
 	// Tell if the player in in sight
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	bool IsPlayerInSight = false;
+
+	// Tell if the monster is attacking
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	bool IsAttacking = false;
+
+	// Tell if the player in in sight
+	UPROPERTY(BlueprintReadWrite, Category = "AI")
+	TObjectPtr<AMonsterAI> MonsterAI;
 };

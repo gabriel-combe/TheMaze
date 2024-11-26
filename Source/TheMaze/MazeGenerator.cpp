@@ -196,7 +196,7 @@ void AMazeGenerator::MoveWallByDir(FNode& Node, EDirection dir, float ZMove)
 // Hide a wall
 void AMazeGenerator::HideWallByDir(FNode& Node, EDirection dir)
 {
-	MoveWallByDir(Node, dir, -300);
+	MoveWallByDir(Node, dir, -301);
 }
 
 // Show a wall
@@ -660,7 +660,7 @@ void AMazeGenerator::HealthPackSpawn()
 
 		if (FMath::SRand() > ProbaHealthPack) continue;
 
-		AHealthPackItem* HealthPack = GetWorld()->SpawnActor<AHealthPackItem>(HealthPackBP, FTransform(GetActorRotation(), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 40), FVector::OneVector));
+		AHealthPackItem* HealthPack = GetWorld()->SpawnActor<AHealthPackItem>(HealthPackBP, FTransform(GetActorRotation(), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 0), FVector::OneVector));
 		ListObjects.Emplace(HealthPack);
 
 		Node->Item = HealthPack;

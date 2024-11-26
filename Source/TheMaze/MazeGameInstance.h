@@ -14,13 +14,10 @@ class THEMAZE_API UMazeGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 	
-protected:
-	UMazeGameInstance();
-	
 public:
 	// Size of the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")
-	TArray<int> Size;
+	TArray<int> Size = {15, 15};
 
 	// Number of enemies in the maze
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze")

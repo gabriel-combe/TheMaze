@@ -2,9 +2,3 @@
 
 
 #include "MazeGameInstance.h"
-
-UMazeGameInstance::UMazeGameInstance()
-{
-	// Set length and default value of Size
-	Size.Init(15, 2);
-}

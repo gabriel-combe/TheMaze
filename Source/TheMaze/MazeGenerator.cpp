@@ -292,15 +292,15 @@ void AMazeGenerator::UpdateNodeForDeadEnd(FNode* Node)
 // Generate a new Maze map (default map)
 void AMazeGenerator::NewMazeMap()
 {
-	// Remove every objects
-	MonsterAIClear();
-	TriggerSpikesClear();
-	ClearObjects();
-
 	// Empty Array
 	MazeMap.Empty();
 	ListUnpopulatedDeadEnd.Empty();
 	ListPopulatedDeadEnd.Empty();
+
+	// Remove every objects
+	MonsterAIClear();
+	TriggerSpikesClear();
+	ClearObjects();
 
 	// Clear all the instances
 	ISMFloorComponent->ClearInstances();

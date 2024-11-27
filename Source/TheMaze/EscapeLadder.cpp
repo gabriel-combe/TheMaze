@@ -13,9 +13,8 @@ AEscapeLadder::AEscapeLadder()
 	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
 	SetRootComponent(DefaultSceneRoot);
 
-	Ladder = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HealthPack"));
+	Ladder = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("EscapeLadder"));
 	Ladder->SetupAttachment(RootComponent);
-	Ladder->SetCollisionProfileName(TEXT("IgnoreOnlyPawn"));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeDefault(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (CubeDefault.Succeeded()) {

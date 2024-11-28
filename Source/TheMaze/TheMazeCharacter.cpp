@@ -173,12 +173,12 @@ void ATheMazeCharacter::Interact(const FInputActionValue& Value)
 
 	// TEST START
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 5.0f, 0, 2.0f);
+	// DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 5.0f, 0, 2.0f);
 
-	HealCharacter(10.0f);
+	// HealCharacter(10.0f);
 
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), CurrentHealth));
+	 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("%f"), CurrentHealth));
 	// TEST END
  
 }
@@ -188,7 +188,7 @@ void ATheMazeCharacter::Use(const FInputActionValue& Value)
 	if (Controller == nullptr) return;
 
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Use");
+	 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Use");
 
 	bool success = RemoveAbilityPoint();
 
@@ -208,7 +208,7 @@ void ATheMazeCharacter::Catched(UPrimitiveComponent* OverlappedComponent, AActor
 	SetDead();
 
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "U DEAD BY MONSTER");
+	 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "U DEAD BY MONSTER");
 }
 
 void ATheMazeCharacter::SetupStimulusSource()

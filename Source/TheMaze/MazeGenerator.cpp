@@ -366,7 +366,7 @@ void AMazeGenerator::NewMazeMap()
 	Origin = FVector2D(Width - 1, Height - 1);
 
 	// Test Sphere to show origin
-	SphereMesh->SetRelativeLocation(FVector((Width - 1) * CellSize, (Height - 1) * CellSize, 0));	
+	// SphereMesh->SetRelativeLocation(FVector((Width - 1) * CellSize, (Height - 1) * CellSize, 0));	
 }
 
 // One step iteration of the maze generation
@@ -477,7 +477,7 @@ void AMazeGenerator::MazeGenIteration()
 	}
 
 	// Test Sphere Move
-	SphereMesh->SetRelativeLocation(FVector(Origin.X * CellSize, Origin.Y * CellSize, 0));
+	// SphereMesh->SetRelativeLocation(FVector(Origin.X * CellSize, Origin.Y * CellSize, 0));
 }
 
 // Fully randomize the Maze for the beginning
@@ -550,6 +550,10 @@ void AMazeGenerator::SpawnStartEnd()
 	AKeyItem* StartKey = GetWorld()->SpawnActor<AKeyItem>(KeyBP, FTransform(StartDoorRot * FQuat(FVector::UpVector, PI * 0.5f), StartDoorPos + StartDoorRot * FVector(CellSize * 0.5f, 0, 0), FVector::OneVector));
 	ListObjects.Emplace(StartKey);
 
+	// Add light to start room
+	ACeilingLight* CeilingLightStart = GetWorld()->SpawnActor<ACeilingLight>(LightBP, FTransform(StartDoorRot, StartDoorPos + StartDoorRot * FVector(CellSize, 0, 300), FVector::OneVector));
+	ListObjects.Emplace(CeilingLightStart);
+
 	// Create the End Room
 	ValidPos = false;
 	while (!ValidPos) {
@@ -591,6 +595,10 @@ void AMazeGenerator::SpawnStartEnd()
 	// Set Escape ladder
 	AEscapeLadder* ladder = GetWorld()->SpawnActor<AEscapeLadder>(LadderBP, FTransform(EndDoorRot, EndDoorPos + EndDoorRot * FVector(CellSize, 0, 0), FVector::OneVector));
 	ListObjects.Emplace(ladder);
+
+	// Add light to end room
+	ACeilingLight* CeilingLightEnd = GetWorld()->SpawnActor<ACeilingLight>(LightBP, FTransform(EndDoorRot, EndDoorPos + EndDoorRot * FVector(CellSize * 0.5f, 0, 300), FVector::OneVector));
+	ListObjects.Emplace(CeilingLightEnd);
 }
 
 // Spawn the specified number of MonsterAI
@@ -776,7 +784,7 @@ void AMazeGenerator::SpawnLights()
 {
 	for (int i = 0; i < Width * Height; i++) {
 
-		if (FMath::SRand() >= 0.8f) continue;
+		if (FMath::SRand() >= 0.7f) continue;
 		
 		FNode* Node = &MazeMap[i];
 

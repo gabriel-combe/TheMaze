@@ -89,6 +89,9 @@ void AMazeGenerator::BeginPlay()
 	// Spawn the Trigger Spikes
 	TriggerSpikesSpawn();
 
+	// Spawn Lights
+	SpawnLights();
+
 	// Relocate and Resize the NavMesh for the AI
 	if (NavMesh) {
 		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
@@ -274,7 +277,7 @@ void AMazeGenerator::UpdateNodeForDeadEnd(FNode* Node)
 			ValidPos = !NewNode->isDeadEnd;
 		}
 
-		Node->Spike->SetActorRelativeTransform(FTransform(GetActorRotation(), GetActorLocation() + FVector(NewNode->Position.X * CellSize, NewNode->Position.Y * CellSize, 40), FVector::OneVector));
+		Node->Spike->SetActorRelativeTransform(FTransform(GetActorRotation(), GetActorLocation() + FVector(NewNode->Position.X * CellSize, NewNode->Position.Y * CellSize, 0), FVector::OneVector));
 
 		NewNode->Spike = Node->Spike;
 		Node->Spike = nullptr;
@@ -517,14 +520,14 @@ void AMazeGenerator::SpawnStartEnd()
 
 		Node = MazeMap[Position.X + Position.Y * Width];
 
-		if (Node.Door) ValidPos = true;
+		if (!Node.Door) ValidPos = true;
 	}
 
 	FVector StartDoorPos = WallTransform.GetLocation();
 	FQuat StartDoorRot = WallTransform.GetRotation();
 
 	// Hide the wall
-	ISMWallComponent->UpdateInstanceTransform(IndexStart, FTransform(StartDoorRot, FVector(StartDoorPos.X, StartDoorPos.Y, -300), FVector::OneVector));
+	ISMWallComponent->UpdateInstanceTransform(IndexStart, FTransform(StartDoorRot, FVector(StartDoorPos.X, StartDoorPos.Y, -301), FVector::OneVector));
 
 	// Create the Start Door
 	ADoorObject* StartDoor = GetWorld()->SpawnActor<ADoorObject>(DoorBP, FTransform(StartDoorRot * FQuat(FVector::UpVector, -PI * 0.5f), StartDoorPos, FVector::OneVector));
@@ -569,7 +572,7 @@ void AMazeGenerator::SpawnStartEnd()
 	FQuat EndDoorRot = WallTransform.GetRotation();
 	
 	// Hide the wall
-	ISMWallComponent->UpdateInstanceTransform(IndexEnd, FTransform(EndDoorRot, FVector(EndDoorPos.X, EndDoorPos.Y, -300), FVector::OneVector));
+	ISMWallComponent->UpdateInstanceTransform(IndexEnd, FTransform(EndDoorRot, FVector(EndDoorPos.X, EndDoorPos.Y, -301), FVector::OneVector));
 
 	// Create the Exit Door
 	ADoorObject* EndDoor = GetWorld()->SpawnActor<ADoorObject>(DoorBP, FTransform(EndDoorRot * FQuat(FVector::UpVector, PI * 0.5f), EndDoorPos, FVector::OneVector));
@@ -632,7 +635,7 @@ void AMazeGenerator::TriggerSpikesSpawn()
 
 		if (Node->isDeadEnd || FMath::SRand() > ProbaTriggerSpikes) continue;
 
-		ATriggerSpikes* Spike = GetWorld()->SpawnActor<ATriggerSpikes>(TriggerSpikesBP, FTransform(GetActorRotation(), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 40), FVector::OneVector));
+		ATriggerSpikes* Spike = GetWorld()->SpawnActor<ATriggerSpikes>(TriggerSpikesBP, FTransform(GetActorRotation(), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 0), FVector::OneVector));
 		ListTriggerSpikes.Emplace(Spike);
 		
 		Node->Spike = Spike;
@@ -660,7 +663,7 @@ void AMazeGenerator::HealthPackSpawn()
 
 		if (FMath::SRand() > ProbaHealthPack) continue;
 
-		AHealthPackItem* HealthPack = GetWorld()->SpawnActor<AHealthPackItem>(HealthPackBP, FTransform(GetActorRotation(), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 0), FVector::OneVector));
+		AHealthPackItem* HealthPack = GetWorld()->SpawnActor<AHealthPackItem>(HealthPackBP, FTransform(GetActorRotation().Quaternion() * FQuat(FVector::UpVector, PI * 0.5f), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 0), FVector::OneVector));
 		ListObjects.Emplace(HealthPack);
 
 		Node->Item = HealthPack;
@@ -766,6 +769,21 @@ void AMazeGenerator::SpawnPlayer()
 	if (!player) return;
 
 	player->SetActorRelativeTransform(StartTransform);
+}
+
+// Called to spawn a light with a probability
+void AMazeGenerator::SpawnLights()
+{
+	for (int i = 0; i < Width * Height; i++) {
+
+		if (FMath::SRand() >= 0.8f) continue;
+		
+		FNode* Node = &MazeMap[i];
+
+		ACeilingLight* CeilingLight = GetWorld()->SpawnActor<ACeilingLight>(LightBP, FTransform(FQuat::Identity, FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 300), FVector::OneVector));
+
+		ListObjects.Emplace(CeilingLight);
+	}
 }
 
 // Display Dead End

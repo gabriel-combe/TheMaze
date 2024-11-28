@@ -19,7 +19,6 @@ AEscapeLadder::AEscapeLadder()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeDefault(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (CubeDefault.Succeeded()) {
 		Ladder->SetStaticMesh(CubeDefault.Object);
-		Ladder->SetRelativeScale3D(FVector(0.25f, 0.5f, 4.0f));
 		Ladder->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	}
 }

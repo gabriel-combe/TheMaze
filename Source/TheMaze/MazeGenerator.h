@@ -12,6 +12,7 @@
 #include "KeyItem.h"
 #include "HealthPackItem.h"
 #include "EscapeLadder.h"
+#include "CeilingLight.h"
 #include "TheMazeCharacter.h"
 #include "NavigationSystem.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
@@ -90,7 +91,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	// TEST
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Mesh")
+	UPROPERTY(BlueprintReadOnly, Category = "Maze|Mesh")
 	UInstancedStaticMeshComponent* CubeInstance;
 
 	// NavMesh for MonsterAI navigation
@@ -98,11 +99,11 @@ protected:
 	TObjectPtr<ANavMeshBoundsVolume> NavMesh;
 
 	// Instanced static mesh component for the floors
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Mesh")
+	UPROPERTY(BlueprintReadOnly, Category = "Maze|Mesh")
 	TObjectPtr<UInstancedStaticMeshComponent> ISMFloorComponent;
 
 	// Instanced static mesh component for the walls
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Mesh")
+	UPROPERTY(BlueprintReadOnly, Category = "Maze|Mesh")
 	TObjectPtr<UInstancedStaticMeshComponent> ISMWallComponent;
 
 	// AI Monster blueprint
@@ -128,6 +129,10 @@ protected:
 	// Ladder blueprint
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
 	TSubclassOf<AEscapeLadder> LadderBP;
+
+	// Light blueprint
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Spawnable")
+	TSubclassOf<ACeilingLight> LightBP;
 
 	// Width of the Maze
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
@@ -158,7 +163,7 @@ protected:
 	float ProbaHealthPack;
 
 	// List of the total number of key for each Tier
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze|Settings")
+	UPROPERTY(BlueprintReadWrite, Category = "Maze|Settings")
 	TArray<int> ListNumberKeyByTier;
 
 	// Size of each cell of the maze
@@ -166,15 +171,15 @@ protected:
 	float CellSize = 200;
 
 	// 1D array representing the 2D Maze (contain nodes)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze")
+	UPROPERTY(BlueprintReadOnly, Category = "Maze")
 	TArray<FNode> MazeMap;
 
 	// List of Unpopulated Dead End Node
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze")
+	UPROPERTY(BlueprintReadOnly, Category = "Maze")
 	TArray<FNode> ListUnpopulatedDeadEnd;
 
 	// List of Populated Dead End Node
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze")
+	UPROPERTY(BlueprintReadOnly, Category = "Maze")
 	TArray<FNode> ListPopulatedDeadEnd;
 
 public:	
@@ -209,23 +214,23 @@ public:
 	int GetNeighbourViaDirection(FVector2D pos, FVector2D dir) const { return (pos.X + dir.X) + (pos.Y + dir.Y) * Width; }
 
 	// Spawn the Monster AI in the maze
-	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	UFUNCTION(BlueprintCallable, Category = "Maze") // Just for testing
 	void MonsterAISpawn();
 
 	// Clear all the Monster AI in the maze
-	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	UFUNCTION(BlueprintCallable, Category = "Maze") // Just for testing
 	void MonsterAIClear();
 
 	// Spawn the Trigger Spikes in the maze
-	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	UFUNCTION(BlueprintCallable, Category = "Maze") // Just for testing
 	void TriggerSpikesSpawn();
 
 	// Clear all the Trigger Spikes in the maze
-	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	UFUNCTION(BlueprintCallable, Category = "Maze") // Just for testing
 	void TriggerSpikesClear();
 
 	// Spawn the Health Pack in the maze
-	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze") // Just for testing
+	UFUNCTION(BlueprintCallable, Category = "Maze") // Just for testing
 	void HealthPackSpawn();
 
 	// Spawn Doors and Keys in the Maze
@@ -243,6 +248,10 @@ public:
 	// Called to Spawn the Player at the Start Room
 	UFUNCTION(BlueprintCallable, Category = "Maze")
 	void SpawnPlayer();
+
+	// Called to spawn a light with a probability
+	UFUNCTION(BlueprintCallable, Category = "Maze")
+	void SpawnLights();
 
 	// Display Dead End
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "Maze")

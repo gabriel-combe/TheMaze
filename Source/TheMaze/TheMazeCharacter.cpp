@@ -78,6 +78,7 @@ void ATheMazeCharacter::BeginPlay()
 	// Save the base max walk speed
 	SpeedBase = GetCharacterMovement()->MaxWalkSpeed;
 
+	// Create a timer for the Chrono
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::SetDead);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleChrono, Delegate, ChronoTime, false);
 
@@ -315,6 +316,7 @@ void ATheMazeCharacter::SetInvincibility()
 	// Clear any unfinished timer
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandleInvincibility);
 
+	// Create a timer to reset the invincibility
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::ResetInvincibility);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleInvincibility, Delegate, InvincibilityDuration, false);
 
@@ -335,6 +337,7 @@ void ATheMazeCharacter::GiveSpeedBoost()
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandleSpeedBoost);
 	GetCharacterMovement()->MaxWalkSpeed = SpeedBase;
 
+	// Create a timer to reset the speed boost
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATheMazeCharacter::ResetSpeedBoost);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleSpeedBoost, Delegate, SpeedBoostDuration, false);
 

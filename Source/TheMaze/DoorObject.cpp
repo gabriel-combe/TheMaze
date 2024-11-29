@@ -108,10 +108,10 @@ void ADoorObject::Interact_Implementation(ATheMazeCharacter* player)
 		WidgetDoor->SetVisibility(false);
 		DoorLComp->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 		DoorRComp->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-	}
 
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "DOOR OPENED");
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Emerald, "DOOR OPENED");
+	}
 }
 
 // Set the key tier

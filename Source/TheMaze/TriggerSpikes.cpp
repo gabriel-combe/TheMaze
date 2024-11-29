@@ -30,7 +30,7 @@ ATriggerSpikes::ATriggerSpikes()
 
 void ATriggerSpikes::BeginPlay()
 {
-	// Call the base class  
+	// Call the constructor of the base class  
 	Super::BeginPlay();
 
 	// Register Events
@@ -40,12 +40,11 @@ void ATriggerSpikes::BeginPlay()
 
 void ATriggerSpikes::DamagePlayer(AActor* OverlappedComponent, AActor* OtherActor)
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Magenta, "BEGIN OVERLAP");
 	if (!OtherActor->ActorHasTag("Player")) return;
 
 	ATheMazeCharacter* player = Cast<ATheMazeCharacter>(OtherActor);
 
+	// Create a timer to apply damage over time
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ATriggerSpikes::ApplyDamage, player);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Delegate, 0.5f, true, 0.0f);
 

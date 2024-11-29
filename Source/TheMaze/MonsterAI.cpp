@@ -66,6 +66,7 @@ void AMonsterAI::Stun(AActor* OverlappedComponent, AActor* OtherActor)
 
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandleStun);
 
+	// Create a timer to reset the stun of the monster ai
 	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &AMonsterAI::ResetStun);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandleStun, Delegate, 2.0f, false);
 

@@ -1,7 +1,7 @@
 # TheMaze
 Maze Project in UE5 (M1 ATI)
 
-[TestDemo](./Pictures/Test_Demo.gif)
+![TestDemo](./Pictures/Test_Demo.gif)
 
 ## Context
 This project is the final project for the course Unreal Engine Blueprint.

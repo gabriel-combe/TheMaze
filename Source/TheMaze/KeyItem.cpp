@@ -20,24 +20,10 @@ AKeyItem::AKeyItem()
 	KeyItemComp->SetupAttachment(RootComponent);
 	KeyItemComp->SetCollisionProfileName(TEXT("IgnoreOnlyPawn"));
 	
-	// Nee to modify the material and not the mesh
-	KeyItemCommon = CreateDefaultSubobject<UStaticMesh>("KeyCommon");
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> KeyCommon(TEXT("/Game/Assets/Key_Common.Key_Common"));
-	if (KeyCommon.Succeeded()) {
-		KeyItemCommon = KeyCommon.Object;
-	}
-
-	KeyItemUncommon = CreateDefaultSubobject<UStaticMesh>("KeyUncommon");
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> KeyUncommon(TEXT("/Game/Assets/Key_Uncommon.Key_Uncommon"));
-	if (KeyUncommon.Succeeded()) {
-		KeyItemUncommon = KeyUncommon.Object;
-	}
-
-	KeyItemRare = CreateDefaultSubobject<UStaticMesh>("KeyRare");
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> KeyRare(TEXT("/Game/Assets/Key_Rare.Key_Rare"));
-	if (KeyRare.Succeeded()) {
-		KeyItemRare = KeyRare.Object;
-	}
+	// Need to modify the material and not the mesh
+	// KeyItemCommon = CreateDefaultSubobject<UStaticMesh>("KeyCommon");
+	// KeyItemUncommon = CreateDefaultSubobject<UStaticMesh>("KeyUncommon");
+	// KeyItemRare = CreateDefaultSubobject<UStaticMesh>("KeyRare");
 
 	KeyItemComp->SetStaticMesh(KeyItemCommon);
 	KeyItemComp->SetRelativeScale3D(FVector(0.2f, 0.2f, 0.2f));

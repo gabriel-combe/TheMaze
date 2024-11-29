@@ -22,11 +22,11 @@ AMazeGenerator::AMazeGenerator()
 	ISMWallComponent->SetupAttachment(ISMFloorComponent);
 
 	// Sphere and Cube Test setup
-	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
-	SphereMesh->SetupAttachment(RootComponent);
+	// SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
+	// SphereMesh->SetupAttachment(RootComponent);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
-	SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
+	// static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
+	// SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
 
 	CubeInstance = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Cube Test"));
 	CubeInstance->SetupAttachment(RootComponent);
@@ -199,7 +199,7 @@ void AMazeGenerator::MoveWallByDir(FNode& Node, EDirection dir, float ZMove)
 // Hide a wall
 void AMazeGenerator::HideWallByDir(FNode& Node, EDirection dir)
 {
-	MoveWallByDir(Node, dir, -301);
+	MoveWallByDir(Node, dir, -310);
 }
 
 // Show a wall
@@ -329,7 +329,7 @@ void AMazeGenerator::NewMazeMap()
 		MazeMap.Emplace(CurrentNode);
 
 		// Set initial wall display for the path (Hide or not)
-		ISMWallComponent->UpdateInstanceTransform(CurrentNode.WallArray[int(EDirection::WEST)], FTransform(FQuat::Identity, FVector(100.0f + CurrentNode.Position.X * CellSize, CurrentNode.Position.Y * CellSize, -300), FVector::OneVector));
+		ISMWallComponent->UpdateInstanceTransform(CurrentNode.WallArray[int(EDirection::WEST)], FTransform(FQuat::Identity, FVector(100.0f + CurrentNode.Position.X * CellSize, CurrentNode.Position.Y * CellSize, -310), FVector::OneVector));
 
 		for (int x = 1; x < Width - 1; x++) {
 			CurrentNode = FNode(FVector2D(x, y), FVector2D(1, 0));
@@ -527,7 +527,7 @@ void AMazeGenerator::SpawnStartEnd()
 	FQuat StartDoorRot = WallTransform.GetRotation();
 
 	// Hide the wall
-	ISMWallComponent->UpdateInstanceTransform(IndexStart, FTransform(StartDoorRot, FVector(StartDoorPos.X, StartDoorPos.Y, -301), FVector::OneVector));
+	ISMWallComponent->UpdateInstanceTransform(IndexStart, FTransform(StartDoorRot, FVector(StartDoorPos.X, StartDoorPos.Y, -310), FVector::OneVector));
 
 	// Create the Start Door
 	ADoorObject* StartDoor = GetWorld()->SpawnActor<ADoorObject>(DoorBP, FTransform(StartDoorRot * FQuat(FVector::UpVector, -PI * 0.5f), StartDoorPos, FVector::OneVector));
@@ -576,7 +576,7 @@ void AMazeGenerator::SpawnStartEnd()
 	FQuat EndDoorRot = WallTransform.GetRotation();
 	
 	// Hide the wall
-	ISMWallComponent->UpdateInstanceTransform(IndexEnd, FTransform(EndDoorRot, FVector(EndDoorPos.X, EndDoorPos.Y, -301), FVector::OneVector));
+	ISMWallComponent->UpdateInstanceTransform(IndexEnd, FTransform(EndDoorRot, FVector(EndDoorPos.X, EndDoorPos.Y, -310), FVector::OneVector));
 
 	// Create the Exit Door
 	ADoorObject* EndDoor = GetWorld()->SpawnActor<ADoorObject>(DoorBP, FTransform(EndDoorRot * FQuat(FVector::UpVector, PI * 0.5f), EndDoorPos, FVector::OneVector));
@@ -671,7 +671,7 @@ void AMazeGenerator::HealthPackSpawn()
 
 		if (FMath::SRand() > ProbaHealthPack) continue;
 
-		AHealthPackItem* HealthPack = GetWorld()->SpawnActor<AHealthPackItem>(HealthPackBP, FTransform(GetActorRotation().Quaternion() * FQuat(FVector::UpVector, PI * 0.5f), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 0), FVector::OneVector));
+		AHealthPackItem* HealthPack = GetWorld()->SpawnActor<AHealthPackItem>(HealthPackBP, FTransform(FQuat(FVector::UpVector, PI * 0.5f), GetActorLocation() + FVector(Node->Position.X * CellSize, Node->Position.Y * CellSize, 0), FVector::OneVector));
 		ListObjects.Emplace(HealthPack);
 
 		Node->Item = HealthPack;

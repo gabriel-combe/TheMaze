@@ -9,7 +9,7 @@
 ATriggerSpikes::ATriggerSpikes()
 {
 	SetActorHiddenInGame(false);
-	GetSpriteComponent()->bHiddenInGame = true;
+	// GetSpriteComponent()->bHiddenInGame = true; // Makes the build failed
 	GetCollisionComponent()->bHiddenInGame = true;
 
 	SpikesMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Spikes"));

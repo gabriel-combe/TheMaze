@@ -147,7 +147,7 @@ protected:
 	int NumberOfMonster;
 
 	// Time between Maze Evolution
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Maze|Settings")
 	int EvolutionTime;
 
 	// Number of Rare key to escape the Maze

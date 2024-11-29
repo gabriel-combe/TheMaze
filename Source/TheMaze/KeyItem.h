@@ -23,15 +23,15 @@ private:
 
 	// Mesh of the common key
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
-	UStaticMesh* KeyItemCommon;
+	UStaticMesh* KeyItemCommon = nullptr;
 
 	// Mesh of the uncommon key
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
-	UStaticMesh* KeyItemUncommon;
+	UStaticMesh* KeyItemUncommon = nullptr;
 
 	// Mesh of the rare key
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tier", meta = (AllowPrivateAccess = "true"))
-	UStaticMesh* KeyItemRare;
+	UStaticMesh* KeyItemRare = nullptr;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

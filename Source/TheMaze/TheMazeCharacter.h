@@ -88,7 +88,7 @@ private:
 
 	/** Distance of the box trace */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player", meta = (AllowPrivateAccess = "true", ClampMin = 0.0f))
-	float TraceDistance = 100.0f;
+	float TraceDistance = 150.0f;
 
 	/** Maximum Health */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health", meta = (AllowPrivateAccess = "true", ClampMin = 1.0f))

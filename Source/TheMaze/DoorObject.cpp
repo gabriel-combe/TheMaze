@@ -19,27 +19,11 @@ ADoorObject::ADoorObject()
 	DoorLComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorL"));
 	DoorLComp->SetupAttachment(RootComponent);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorL(TEXT("/Game/Assets/Door_Metal_L.Door_Metal_L"));
-	if (DoorL.Succeeded()) {
-		DoorLComp->SetStaticMesh(DoorL.Object);
-	}
-
 	DoorRComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorR"));
 	DoorRComp->SetupAttachment(RootComponent);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorR(TEXT("/Game/Assets/Door_Metal_R.Door_Metal_R"));
-	if (DoorR.Succeeded()) {
-		DoorRComp->SetStaticMesh(DoorR.Object);
-	}
-
 	DoorTopComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorTop"));
 	DoorTopComp->SetupAttachment(RootComponent);
-	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorTop(TEXT("/Game/Assets/Door_Top_Wall.Door_Top_Wall"));
-	if (DoorTop.Succeeded()) {
-		DoorTopComp->SetStaticMesh(DoorTop.Object);
-	}
-
 
 	DoorLComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f)); 
 	DoorRComp->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));

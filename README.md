@@ -7,7 +7,7 @@ Maze Project in UE5 (M1 ATI)
 This project is the final project for the course Unreal Engine Blueprint.
 It was suppose to be done in UE Blueprint, but I took the challenge to do it in UE C++.
 
-This was a great experience as it made me learn how to use UE C++, its advantages and its limitations (no more widget in C++). Despite seeming verbose at first, I mostly (still learning all it) understand what all the macros are for and how to use them.
+This was a great experience as it made me learn how to use UE C++, its advantages and its limitations (no more widget in C++). Despite seeming verbose at first, I mostly (still learning) understand what all the macros are for and how to use them.
 
 However there is nearly no documentation on UE C++, so I had a rough start, but after some research and practice it became easier and easier to know what do to and use in specific context.
 As it is my very first UE C++ project, the code surely contains errors or bad coding practice, if you spot any feel free to tell me, any advices are welcomed!
